@@ -107,13 +107,13 @@ npm start
 
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/team-work-tools/team-work-telegram-bot?style=for-the-badge&color=%23F5C638
+[contributors-shield]: https://img.shields.io/github/contributors/Data-Wrangling-and-Visualisation/Codeforces-Insights?style=for-the-badge&color=%23F5C638
 [contributors-url]: ../../contributors
 
-[forks-shield]: https://img.shields.io/github/forks/team-work-tools/team-work-telegram-bot?style=for-the-badge&color=%23F5C638
+[forks-shield]: https://img.shields.io/github/forks/Data-Wrangling-and-Visualisation/Codeforces-Insights?style=for-the-badge&color=%23F5C638
 [forks-url]: ../../forks
 
-[issues-shield]: https://img.shields.io/github/issues/team-work-tools/team-work-telegram-bot?style=for-the-badge&color=%23F5C638
+[issues-shield]: https://img.shields.io/github/issues/Data-Wrangling-and-Visualisation/Codeforces-Insights?style=for-the-badge&color=%23F5C638
 [issues-url]: ../../issues
 
 [license-shield]: https://img.shields.io/github/license/team-work-tools/team-work-telegram-bot?style=for-the-badge&color=%23F5C638
