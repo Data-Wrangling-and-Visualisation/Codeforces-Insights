@@ -9,8 +9,8 @@
 <br />
 <div align="center">
   <h3 align="center">Codeforces Insights</h3>
-  <p align="center" style="color:rgb(171, 128, 0);">
-    Website visualizing statistics of competitive programmers activity on the Codeforces.
+  <p align="center">
+    🟡 Website visualizing statistics of competitive programmers activity on the Codeforces🟡
     <br />
   </p>
 </div>
