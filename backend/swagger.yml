@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: "RP Flask REST API"
+  description: "An API provide statistics about users, blogs, problems, topics on Codeforces platform"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+
+paths:
+  /topics:
+    get:
+      operationId: "routes.get_topics"
+      tags:
+        - "Topics"
+      summary: "Get the list of topics"
+      responses:
+        "200":
+          description: "Successfully read the list of topics"
+  /topics_distribution_by_rating:
+    get:
+      operationId: "routes.get_topics_distribution_by_rating"
+      tags:
+        - "Topics"
+      summary: "Get the number of problems for each topic and rating value"
+      responses:
+        "200":
+          description: "Successfully read distribution of topics by rating"
+  /topics_correlation:
+    get:
+      operationId: "routes.get_topics_correlation"
+      tags:
+        - "Topics"
+      summary: "Get the number of problems for each pair of topics"
+      responses:
+        "200":
+          description: "Successfully read the correlation between topics"
+  /topics_solvability:
+    get:
+      operationId: "routes.get_topics_solvability"
+      tags:
+        - "Topics"
+      summary: "Get the solvability of each topic, where solvability = #success_trial / #unsuccess_trials"
+      responses:
+        "200":
+          description: "Successfully read topics' solvability"
+  /users_rating_distribution_by_experience:
+    get:
+      operationId: "routes.get_rating_distribution_by_experience"
+      tags:
+        - "Users"
+      summary: "Get the distribution of user rating by time of registration on Codeforces"
+      responses:
+        "200":
+          description: "Successfully read user rating distribution by experience"
+  /users_rating_distribution_by_solutions_amount:
+    get:
+      operationId: "routes.get_rating_distribution_by_solutions_amount"
+      tags:
+        - "Users"
+      summary: "Get the distribution of user rating by number of solved problems"
+      responses:
+        "200":
+          description: "Successfully get distribution between user rating and number of solved problems"
+  /users_rating_distribution_by_solutions_rating:
+    get:
+      operationId: "routes.get_rating_distribution_by_solutions_rating"
+      tags:
+        - "Users"
+      summary: "Get the distribution of user rating by rating of solved problems"
+      responses:
+        "200":
+          description: "Successfully get distribution between user rating and rating of solved problems"
+  /users_rating_distribution_by_solutions_solvability:
+    get:
+      operationId: "routes.get_rating_distribution_by_solutions_solvability"
+      tags:
+        - "Users"
+      summary: "Get the distribution of user rating by solvability of solved problems"
+      responses:
+        "200":
+          description: "Successfully get distribution between user rating and solvability of solutions"
