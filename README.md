@@ -80,12 +80,24 @@ venv\Scripts\activate      # For Windows
 pip install -r requirements.txt  # Install dependencies
 ```
 
+Create a `.env` file in the `backend` folder and populate it with the following environment variables:
+
+   ```ini
+   DB_NAME=your_database_name
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+   DB_HOST=your_database_host
+   DB_PORT=your_database_port
+   ```
+
 Run the Flask server
 
 ```bash
 python app.py
 ```
 After the server starts, it will be available at http://127.0.0.1:5000.
+
+API documentation will be available at [http://127.0.0.1:5000/api/ui](http://127.0.0.1:5000/api/ui)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
