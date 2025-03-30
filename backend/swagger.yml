@@ -80,3 +80,12 @@ paths:
       responses:
         "200":
           description: "Successfully get distribution between user rating and solvability of solutions"
+  /blogs_topics_data:
+    get:
+      operationId: "routes.get_blog_topics_data"
+      tags:
+        - "Blogs"
+      summary: "Get the avg rating and number of comments for each blog topic"
+      responses:
+        "200":
+          description: "Successfully get avg rating and number of comments for each blog topic"

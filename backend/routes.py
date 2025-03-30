@@ -197,3 +197,24 @@ def get_rating_distribution_by_solutions_solvability():
     } for item in rated_solvability]
 
     return rated_solvability
+
+
+@timed_cache(seconds=3600 * 24)
+def get_blog_topics_data():
+    topics_data = db.session.execute(db.text(
+        """
+        SELECT bt.tag, AVG(b.rating), AVG("numberOfComments")
+        FROM blogs AS b
+        JOIN blog_tags AS bt ON b.id = bt.blog_id
+        GROUP BY bt.tag
+        ORDER BY bt.tag
+        """
+    )).all()
+
+    topics_data = [{
+        "topic": item[0],
+        "avg_rating": item[1],
+        "avg_number_of_comments": item[2]
+    } for item in topics_data]
+
+    return topics_data
