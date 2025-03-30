@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from "react";
+// src/App.js
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import UserRating from "./pages/UserRating";
+import TopicRelationships from "./pages/TopicRelationships";
+import Tasks from "./pages/Tasks";
+import Blogs from "./pages/Blogs";
+import "./index.css";
 
 function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/hello")
-      .then((response) => response.json())
-      .then((data) => setMessage(data.message))
-      .catch((error) => console.error("Ошибка запроса:", error));
-  }, []);
-
   return (
-    <div>
-      <h1>React + Flask</h1>
-      <p>{message}</p>
-    </div>
+    <Router>
+      <div className="bg-darkBlue text-white min-h-screen relative overflow-hidden">
+        <Header />
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/user-rating" element={<UserRating />} />
+          <Route path="/topic-relationships" element={<TopicRelationships />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/blogs" element={<Blogs />} />
+        </Routes>
+        <div className="absolute top-0 left-4 h-full w-[1px] bg-yellow-400 z-0" />
+        <div className="absolute top-0 right-4 h-full w-[1px] bg-yellow-400 z-0" />
+      </div>
+    </Router>
   );
 }
 
