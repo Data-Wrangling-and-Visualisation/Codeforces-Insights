@@ -13,6 +13,7 @@ function App() {
     <Router>
       <div className="bg-darkBlue text-white min-h-screen relative overflow-hidden">
         <Header />
+        <main className="pt-[80px] px-4 font-sans">
         <Routes>
           <Route path="/" element={<Hero />} />
           <Route path="/user-rating" element={<UserRating />} />
@@ -22,6 +23,7 @@ function App() {
         </Routes>
         <div className="absolute top-0 left-4 h-full w-[1px] bg-yellow-400 z-0" />
         <div className="absolute top-0 right-4 h-full w-[1px] bg-yellow-400 z-0" />
+        </main>
       </div>
     </Router>
   );

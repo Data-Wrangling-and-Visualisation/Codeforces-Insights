@@ -95,9 +95,9 @@ Run the Flask server
 ```bash
 python app.py
 ```
-After the server starts, it will be available at http://127.0.0.1:5000.
+After the server starts, it will be available at http://127.0.0.1:8000.
 
-API documentation will be available at [http://127.0.0.1:5000/api/ui](http://127.0.0.1:5000/api/ui)
+API documentation will be available at [http://127.0.0.1:8000/api/ui](http://127.0.0.1:8000/api/ui)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
