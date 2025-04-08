@@ -40,7 +40,7 @@ paths:
       operationId: "routes.get_topics_solvability"
       tags:
         - "Topics"
-      summary: "Get the solvability of each topic, where solvability = #success_trial / #unsuccess_trials"
+      summary: "Get the solvability of each topic, where solvability = #success_trial / #trials"
       responses:
         "200":
           description: "Successfully read topics' solvability"

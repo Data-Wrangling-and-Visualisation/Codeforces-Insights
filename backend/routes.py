@@ -92,25 +92,23 @@ def get_rating_distribution_by_experience():
     rated_experience = db.session.execute(db.text(
         """
         WITH rated_experience AS (
-        SELECT (new_rating / 50) * 50 AS rating,
+        SELECT new_rating AS rating,
                 (("startTimeSeconds" - "registrationTimeSeconds") / (3600 * 24 * 365)) AS experience
             FROM users AS u
             JOIN participations AS p ON u.handle = p.user_handle
             JOIN contests ON p.contest_id = contests.id
             WHERE p.rating_change <= 250
         )
-        SELECT rating, experience, count(*)
+        SELECT experience, AVG(rating)
         FROM rated_experience
-        GROUP BY rating, experience
-        ORDER BY rating, experience
+        GROUP BY experience
+        ORDER BY experience
         """
     )).all()
 
     rated_experience = [{
-        "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+49,
-        "time_registration_years": item[1],
-        "number_of_users": item[2]
+        "time_registration_years": item[0],
+        "avg_rating": item[1]
     } for item in rated_experience]
     return rated_experience
 
