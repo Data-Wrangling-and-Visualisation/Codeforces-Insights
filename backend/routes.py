@@ -1,3 +1,4 @@
+from collections import defaultdict
 from functools import lru_cache
 from config import db
 import time
@@ -91,52 +92,59 @@ def get_topics_solvability():
 def get_rating_distribution_by_experience():
     rated_experience = db.session.execute(db.text(
         """
-        WITH rated_experience AS (
-        SELECT (p.new_rating / 50) * 50 AS rating,
-                (("startTimeSeconds" - "registrationTimeSeconds") / (3600 * 24 * 365)) AS experience
-            FROM users AS u
-            JOIN participations AS p ON u.handle = p.user_handle
+        WITH user_last_contest AS (
+            SELECT p.user_handle, MAX(contests.id) AS contest_id,
+                    MAX("startTimeSeconds") AS startTimeSeconds
+            FROM participations AS p
             JOIN contests ON p.contest_id = contests.id
-            WHERE p.rating_change <= 250
+            GROUP BY p.user_handle
         )
-        SELECT rating, AVG(experience)
-        FROM rated_experience
-        GROUP BY rating
-        ORDER BY rating
+        SELECT (p.new_rating / 100) * 100 AS rating,
+                ((ulc.startTimeSeconds - "registrationTimeSeconds") / (3600 * 24 * 365)) AS experience
+        FROM users AS u
+        JOIN user_last_contest AS ulc ON u.handle = ulc.user_handle
+        JOIN participations AS p ON u.handle = p.user_handle AND p.contest_id = ulc.contest_id
+        WHERE p.rating_change <= 250
+        ORDER BY p.new_rating
         """
     )).all()
 
+    rated_experience_dict = defaultdict(list)
+
+    for item in rated_experience:
+        rated_experience_dict[item[0]].append(item[1])
+
     rated_experience = [{
         "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+49,
-        "time_registration_years_avg": item[1]
-    } for item in rated_experience]
+        "rating_upper_bound": item[0]+99,
+        "time_registration_years": item[1]
+    } for item in rated_experience_dict.items()]
     return rated_experience
 
 
 @timed_cache(seconds=3600*24)
 def get_rating_distribution_by_solutions_amount():
-    rated_solutions_number = db.session.execute(db.text(
+    rated_solution_number = db.session.execute(db.text(
         """
-        WITH rated_solutions AS (
-            SELECT p.user_handle, (p.new_rating / 50) * 50 AS rating, count(*) AS number_of_solutions
-            FROM participations AS p
-            JOIN solutions AS s ON p.user_handle = s.user_handle
-            WHERE p.rating_change <= 250
-            GROUP BY p.user_handle, p.new_rating
-        )
-        SELECT rating, AVG(number_of_solutions)
-        FROM rated_solutions
-        GROUP BY rating
-        ORDER BY rating
+        SELECT p.user_handle, (p.new_rating / 100) * 100 AS rating, count(*) AS number_of_solutions
+        FROM participations AS p
+        JOIN solutions AS s ON p.user_handle = s.user_handle
+        WHERE p.rating_change <= 250
+        GROUP BY p.user_handle, p.new_rating
+        ORDER BY p.new_rating
         """
     )).all()
 
+    rated_solution_number_dict = defaultdict(list)
+
+    for item in rated_solution_number:
+        rated_solution_number_dict[item[1]].append(item[2])
+
     rated_solutions_number = [{
         "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+49,
-        "avg_number_of_solved_problems": item[1]
-    } for item in rated_solutions_number]
+        "rating_upper_bound": item[0]+99,
+        "number_of_solved_problems": item[1]
+    } for item in rated_solution_number_dict.items()]
     return rated_solutions_number
 
 
@@ -144,27 +152,27 @@ def get_rating_distribution_by_solutions_amount():
 def get_rating_distribution_by_solutions_rating():
     rating_correlation = db.session.execute(db.text(
         """
-        WITH rating_correlation AS (
-            SELECT pt.user_handle, (pt.new_rating / 50) * 50 AS rating,
-                    AVG(pb.rating) AS avg_solutions_rating
-            FROM participations AS pt
-            JOIN solutions AS s ON pt.user_handle = s.user_handle
-            JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
-            WHERE pt.rating_change <= 250
-            GROUP BY pt.user_handle, pt.new_rating
-        )
-        SELECT rating, AVG(avg_solutions_rating)
-        FROM rating_correlation
-        GROUP BY rating
-        ORDER BY rating
+        SELECT pt.user_handle, (pt.new_rating / 100) * 100 AS rating,
+                AVG(pb.rating) AS avg_solutions_rating
+        FROM participations AS pt
+        JOIN solutions AS s ON pt.user_handle = s.user_handle
+        JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
+        WHERE pt.rating_change <= 250
+        GROUP BY pt.user_handle, pt.new_rating
+        ORDER BY pt.new_rating
         """
     )).all()
 
+    rating_correlation_dict = defaultdict(list)
+
+    for item in rating_correlation:
+        rating_correlation_dict[item[1]].append(item[2])
+
     rating_correlation = [{
         "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+49,
+        "rating_upper_bound": item[0]+99,
         "avg_rating_of_solved_problems": item[1]
-    } for item in rating_correlation]
+    } for item in rating_correlation_dict.items()]
 
     return rating_correlation
 
@@ -173,27 +181,27 @@ def get_rating_distribution_by_solutions_rating():
 def get_rating_distribution_by_solutions_solvability():
     rated_solvability = db.session.execute(db.text(
         """
-        WITH rating_correlation AS (
-            SELECT pt.user_handle, (pt.new_rating / 50) * 50 AS rating,
-                    AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability
-            FROM participations AS pt
-            JOIN solutions AS s ON pt.user_handle = s.user_handle
-            JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
-            WHERE pt.rating_change <= 250
-            GROUP BY pt.user_handle, pt.new_rating
-        )
-        SELECT rating, AVG(avg_solutions_solvability)
-        FROM rating_correlation
-        GROUP BY rating
-        ORDER BY rating
+        SELECT pt.user_handle, (pt.new_rating / 100) * 100 AS rating,
+                AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability
+        FROM participations AS pt
+        JOIN solutions AS s ON pt.user_handle = s.user_handle
+        JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
+        WHERE pt.rating_change <= 250
+        GROUP BY pt.user_handle, pt.new_rating
+        ORDER BY pt.new_rating
         """
     )).all()
 
+    rated_solvability_dict = defaultdict(list)
+
+    for item in rated_solvability:
+        rated_solvability_dict[item[1]].append(item[2])
+
     rated_solvability = [{
         "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+49,
+        "rating_upper_bound": item[0]+99,
         "avg_solvability_of_solved_problems": item[1]
-    } for item in rated_solvability]
+    } for item in rated_solvability_dict.items()]
 
     return rated_solvability
 
