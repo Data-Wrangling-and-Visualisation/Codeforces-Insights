@@ -99,7 +99,7 @@ def get_rating_distribution_by_experience():
             JOIN contests ON p.contest_id = contests.id
             GROUP BY p.user_handle
         )
-        SELECT (p.new_rating / 100) * 100 AS rating,
+        SELECT p.new_rating AS rating,
                 ((ulc.startTimeSeconds - "registrationTimeSeconds") / (3600 * 24 * 365)) AS experience
         FROM users AS u
         JOIN user_last_contest AS ulc ON u.handle = ulc.user_handle
@@ -112,21 +112,17 @@ def get_rating_distribution_by_experience():
     rated_experience_dict = defaultdict(list)
 
     for item in rated_experience:
-        rated_experience_dict[item[0]].append(item[1])
+        rated_experience_dict['rating'].append(item[0])
+        rated_experience_dict['time_registration_years'].append(item[1])
 
-    rated_experience = [{
-        "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+99,
-        "time_registration_years": item[1]
-    } for item in rated_experience_dict.items()]
-    return rated_experience
+    return rated_experience_dict
 
 
 @timed_cache(seconds=3600*24)
 def get_rating_distribution_by_solutions_amount():
     rated_solution_number = db.session.execute(db.text(
         """
-        SELECT p.user_handle, (p.new_rating / 100) * 100 AS rating, count(*) AS number_of_solutions
+        SELECT p.new_rating AS rating, count(*) AS number_of_solutions, p.user_handle
         FROM participations AS p
         JOIN solutions AS s ON p.user_handle = s.user_handle
         WHERE p.rating_change <= 250
@@ -138,22 +134,18 @@ def get_rating_distribution_by_solutions_amount():
     rated_solution_number_dict = defaultdict(list)
 
     for item in rated_solution_number:
-        rated_solution_number_dict[item[1]].append(item[2])
+        rated_solution_number_dict['rating'].append(item[0])
+        rated_solution_number_dict['time_registration_years'].append(item[1])
 
-    rated_solutions_number = [{
-        "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+99,
-        "number_of_solved_problems": item[1]
-    } for item in rated_solution_number_dict.items()]
-    return rated_solutions_number
+    return rated_solution_number_dict
 
 
 @timed_cache(seconds=3600*24)
 def get_rating_distribution_by_solutions_rating():
     rating_correlation = db.session.execute(db.text(
         """
-        SELECT pt.user_handle, (pt.new_rating / 100) * 100 AS rating,
-                AVG(pb.rating) AS avg_solutions_rating
+        SELECT pt.new_rating AS rating,
+                AVG(pb.rating) AS avg_solutions_rating, pt.user_handle
         FROM participations AS pt
         JOIN solutions AS s ON pt.user_handle = s.user_handle
         JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
@@ -166,23 +158,19 @@ def get_rating_distribution_by_solutions_rating():
     rating_correlation_dict = defaultdict(list)
 
     for item in rating_correlation:
-        rating_correlation_dict[item[1]].append(item[2])
+        rating_correlation_dict['rating'].append(item[0])
+        rating_correlation_dict['time_registration_years'].append(item[1])
 
-    rating_correlation = [{
-        "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+99,
-        "avg_rating_of_solved_problems": item[1]
-    } for item in rating_correlation_dict.items()]
-
-    return rating_correlation
+    return rating_correlation_dict
 
 
 @timed_cache(seconds=3600*24)
 def get_rating_distribution_by_solutions_solvability():
     rated_solvability = db.session.execute(db.text(
         """
-        SELECT pt.user_handle, (pt.new_rating / 100) * 100 AS rating,
-                AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability
+        SELECT pt.new_rating AS rating,
+                AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability,
+                pt.user_handle
         FROM participations AS pt
         JOIN solutions AS s ON pt.user_handle = s.user_handle
         JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
@@ -195,15 +183,11 @@ def get_rating_distribution_by_solutions_solvability():
     rated_solvability_dict = defaultdict(list)
 
     for item in rated_solvability:
-        rated_solvability_dict[item[1]].append(item[2])
+        rated_solvability_dict['rating'].append(item[0])
+        rated_solvability_dict['time_registration_years'].append(item[1])
 
-    rated_solvability = [{
-        "rating_lower_bound": item[0],
-        "rating_upper_bound": item[0]+99,
-        "avg_solvability_of_solved_problems": item[1]
-    } for item in rated_solvability_dict.items()]
+    return rated_solvability_dict
 
-    return rated_solvability
 
 
 @timed_cache(seconds=3600 * 24)
