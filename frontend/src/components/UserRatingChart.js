@@ -22,22 +22,51 @@ const UserRatingChart = () => {
   };
 
   const calculateBoxplotDataSolutionsAmount = (data) => {
-    const groupedData = d3.group(data, d => Math.floor(d.number_of_solved_problems / 200) * 200);
+    const maxRange = 4400; // Максимальный диапазон до объединения
+    const rangeSize = 400; // Шаг диапазона
+  
+    // Группировка данных по диапазонам
+    const groupedData = d3.group(data, d => {
+      if (d.number_of_solved_problems > maxRange) {
+        return '4400+'; // Объединяем все значения больше 4400 в один диапазон
+      }
+      return Math.floor(d.number_of_solved_problems / rangeSize) * rangeSize; // Группировка по диапазонам с шагом 200
+    });
+  
     return Array.from(groupedData, ([range, entries]) => {
       const ratings = entries.map(d => d.rating).sort((a, b) => a - b);
+      
+      // Формируем диапазон вида '0-199', '200-399' и т.д.
+      const rangeLabel = range === '4400+' ? '4400+' : `${range}-${range + rangeSize - 1}`;
+      
       return {
-        solvedProblemsRange: range,
+        solvedProblemsRange: rangeLabel,
         q1: d3.quantile(ratings, 0.25),
         median: d3.quantile(ratings, 0.5),
         q3: d3.quantile(ratings, 0.75),
         min: d3.min(ratings),
         max: d3.max(ratings),
       };
-    }).sort((a, b) => a.solvedProblemsRange - b.solvedProblemsRange);
-  };
+    }).sort((a, b) => {
+      if (a.solvedProblemsRange === '4400+') return 1; // Сортируем блок 4400+ в конец
+      if (b.solvedProblemsRange === '4400+') return -1;
+      return a.solvedProblemsRange - b.solvedProblemsRange; // Сортировка по диапазонам
+    });
+};
+
+  
 
   const calculateBoxplotDataSolutionsRating = (data) => {
-    const groupedData = d3.group(data, d => Math.floor(d.avg_rating_of_solved_problems / 200) * 200);
+    const rangeSize = 150; // Размер шага для диапазонов
+    const minRating = 800; // Начальный диапазон
+  
+    // Группировка данных по диапазонам
+    const groupedData = d3.group(data, d => {
+      const rangeStart = Math.max(Math.floor((d.avg_rating_of_solved_problems - minRating) / rangeSize), 0) * rangeSize + minRating;
+      const rangeEnd = rangeStart + rangeSize - 1;
+      return `${rangeStart}-${rangeEnd}`;
+    });
+  
     return Array.from(groupedData, ([range, entries]) => {
       const ratings = entries.map(d => d.rating).sort((a, b) => a - b);
       return {
@@ -48,8 +77,13 @@ const UserRatingChart = () => {
         min: d3.min(ratings),
         max: d3.max(ratings),
       };
-    }).sort((a, b) => a.ratingRange - b.ratingRange);
+    }).sort((a, b) => {
+      const aRange = a.ratingRange.split('-').map(Number);
+      const bRange = b.ratingRange.split('-').map(Number);
+      return aRange[0] - bRange[0]; // Сортировка по начальной границе диапазона
+    });
   };
+  
 
   const calculateBoxplotDataSolutionsSolvability = (data) => {
     const groupedData = d3.group(data, d =>
@@ -81,7 +115,7 @@ const UserRatingChart = () => {
         setData(calculateBoxplotDataSolutionsRating(result));
       } else if (type === "solutions_solvability") {
         setData(calculateBoxplotDataSolutionsSolvability(result));
-      }      
+      }
     } catch (error) {
       console.error("Ошибка при получении данных:", error);
     }
@@ -92,6 +126,7 @@ const UserRatingChart = () => {
   }, [chartType]);
 
   useEffect(() => {
+
     if (data.length === 0) return;
 
     function getXValue(d) {
