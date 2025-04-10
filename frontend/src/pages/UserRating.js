@@ -1,11 +1,13 @@
 // src/pages/UserRating.js
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import UserRatingChart from "../components/UserRatingChart";
 
-const UserRating = () => {
+const UserRating = () => {  
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold">User Rating Page</h1>
-      <p>Добро пожаловать на страницу рейтингов пользователей.</p>
+      {/* <h1 className="text-3xl font-bold mb-4">User Rating Page</h1>
+      <p className="mb-6">Добро пожаловать на страницу рейтингов пользователей.</p> */}
+      <UserRatingChart />
     </div>
   );
 };

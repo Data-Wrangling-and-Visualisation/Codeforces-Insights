@@ -9,6 +9,8 @@ module.exports = {
       colors: {
         darkBlue: '#021521',
         customYellow: '#F5C638',
+        customRed: '#AB1E24',
+        customBlue: '#127FC2',
       },
     },
   },
