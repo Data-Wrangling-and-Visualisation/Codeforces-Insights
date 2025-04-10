@@ -1,13 +1,12 @@
-// src/pages/UserRating.js
-import React from "react";
+import TopicRelationshipsChart from "../components/TopicRelationshipsChart";
 
 const TopicRelationships = () => {
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold">Topic Relationships Page</h1>
-      <p>Добро пожаловать.</p>
-    </div>
-  );
+
+    return (
+        <div className="p-0 m-0">
+            <TopicRelationshipsChart/>
+        </div>
+    );
 };
 
 export default TopicRelationships;
