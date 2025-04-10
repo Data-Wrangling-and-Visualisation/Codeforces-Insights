@@ -1,4 +1,3 @@
-from collections import defaultdict
 from functools import lru_cache
 from config import db
 import time
@@ -109,13 +108,11 @@ def get_rating_distribution_by_experience():
         """
     )).all()
 
-    rated_experience_dict = defaultdict(list)
-
-    for item in rated_experience:
-        rated_experience_dict['rating'].append(item[0])
-        rated_experience_dict['time_registration_years'].append(item[1])
-
-    return rated_experience_dict
+    rated_experience = [{
+        "rating": item[0],
+        "time_registration_years": item[1]
+    } for item in rated_experience]
+    return rated_experience
 
 
 @timed_cache(seconds=3600*24)
@@ -131,13 +128,11 @@ def get_rating_distribution_by_solutions_amount():
         """
     )).all()
 
-    rated_solution_number_dict = defaultdict(list)
-
-    for item in rated_solution_number:
-        rated_solution_number_dict['rating'].append(item[0])
-        rated_solution_number_dict['time_registration_years'].append(item[1])
-
-    return rated_solution_number_dict
+    rated_solutions_number = [{
+        "rating": item[0],
+        "number_of_solved_problems": item[1]
+    } for item in rated_solution_number]
+    return rated_solutions_number
 
 
 @timed_cache(seconds=3600*24)
@@ -155,13 +150,12 @@ def get_rating_distribution_by_solutions_rating():
         """
     )).all()
 
-    rating_correlation_dict = defaultdict(list)
+    rating_correlation = [{
+        "rating": item[0],
+        "avg_rating_of_solved_problems": item[1]
+    } for item in rating_correlation]
 
-    for item in rating_correlation:
-        rating_correlation_dict['rating'].append(item[0])
-        rating_correlation_dict['time_registration_years'].append(item[1])
-
-    return rating_correlation_dict
+    return rating_correlation
 
 
 @timed_cache(seconds=3600*24)
@@ -180,14 +174,12 @@ def get_rating_distribution_by_solutions_solvability():
         """
     )).all()
 
-    rated_solvability_dict = defaultdict(list)
+    rated_solvability = [{
+        "rating": item[0],
+        "avg_solvability_of_solved_problems": item[1]
+    } for item in rated_solvability]
 
-    for item in rated_solvability:
-        rated_solvability_dict['rating'].append(item[0])
-        rated_solvability_dict['time_registration_years'].append(item[1])
-
-    return rated_solvability_dict
-
+    return rated_solvability
 
 
 @timed_cache(seconds=3600 * 24)
