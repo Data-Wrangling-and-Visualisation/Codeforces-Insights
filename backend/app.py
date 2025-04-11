@@ -6,7 +6,6 @@ import config
 app = config.connex_app
 app.add_api(config.basedir / "swagger.yml")
 
-# Разрешенные домены из переменной окружения
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",")
 
 CORS(
@@ -16,9 +15,11 @@ CORS(
     supports_credentials=True
 )
 
+
 @app.route("/")
 def home():
     return jsonify({"message": "Привет от Flask!"})
+
 
 if __name__ == "__main__":
     app.run()

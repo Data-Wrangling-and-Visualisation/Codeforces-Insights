@@ -186,7 +186,7 @@ def get_rating_distribution_by_solutions_solvability():
 def get_blog_topics_data():
     topics_data = db.session.execute(db.text(
         """
-        SELECT bt.tag, AVG(b.rating), AVG("numberOfComments")
+        SELECT bt.tag, AVG(b.rating), AVG("numberOfComments"), COUNT(*)
         FROM blogs AS b
         JOIN blog_tags AS bt ON b.id = bt.blog_id
         GROUP BY bt.tag
@@ -197,7 +197,8 @@ def get_blog_topics_data():
     topics_data = [{
         "topic": item[0],
         "avg_rating": item[1],
-        "avg_number_of_comments": item[2]
+        "avg_number_of_comments": item[2],
+        "number_of_blogs": item[3]
     } for item in topics_data]
 
     return topics_data
