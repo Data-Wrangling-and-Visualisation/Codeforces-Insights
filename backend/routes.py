@@ -2,7 +2,6 @@ from functools import lru_cache
 from config import db
 import time
 
-
 supertopics = {
     "codeforces round": "Competitive Programming",
     "contest solutions": "Competitive Programming",
