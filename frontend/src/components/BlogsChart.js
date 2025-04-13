@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as d3 from "d3";
-import { sankey as d3Sankey, sankeyLinkHorizontal } from "d3-sankey";
+import { sankey as d3Sankey } from "d3-sankey";
 
 const BlogsChart = () => {
   const [selectedSuperTopic, setSelectedSuperTopic] = useState(null);
@@ -11,14 +11,11 @@ const BlogsChart = () => {
   const svgRef = useRef();
   const containerRef = useRef();
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8000/api/blogs_topics_data");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();
         setData(result);
       } catch (err) {
@@ -27,7 +24,6 @@ const BlogsChart = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -41,10 +37,9 @@ const BlogsChart = () => {
       ? relatedData.reduce((sum, item) => sum + item.number_of_blogs, 0)
       : relatedData[0]?.number_of_blogs || 0;
 
-    // Get container position to keep tooltip within bounds
     const containerRect = containerRef.current?.getBoundingClientRect();
-    const maxLeft = containerRect ? containerRect.width - 320 : 0; // 300px width + 20px margin
-    const maxTop = containerRect ? containerRect.height - 500 : 0; // Approx tooltip height
+    const maxLeft = containerRect ? containerRect.width - 320 : 0;
+    const maxTop = containerRect ? containerRect.height - 50 : 0;
 
     setTooltip({
       visible: true,
@@ -56,16 +51,17 @@ const BlogsChart = () => {
         ${!isSuperTopic ? `<div>Main Topic: ${relatedData[0]?.supertopic}</div>` : ''}
       `,
       x: Math.min(event.pageX, maxLeft),
-      y: Math.min(event.pageY - 10, maxTop) // Slightly above cursor
+      y: Math.min(event.pageY - 10, maxTop)
     });
   };
 
   useEffect(() => {
     if (loading || error || data.length === 0) return;
 
-    const width = 1000;
-    const height = 800;
-    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    const container = containerRef.current;
+    const width = container.offsetWidth;
+    const height = window.innerHeight * 0.9;
+    const margin = { top: 20, right: width * 0.2, bottom: 20, left: width * 0.2 };
 
     const nodesMap = new Map();
     const links = [];
@@ -78,7 +74,7 @@ const BlogsChart = () => {
       return nodesMap.get(name).id;
     }
 
-    data.forEach((d) => {
+    data.forEach(d => {
       links.push({
         source: getNodeId(d.supertopic),
         target: getNodeId(d.topic),
@@ -90,14 +86,13 @@ const BlogsChart = () => {
     const superTopics = new Set(data.map(d => d.supertopic));
 
     const sankey = d3Sankey()
-      .nodeId((d) => d.id)
+      .nodeId(d => d.id)
       .nodeWidth(20)
       .nodePadding(40)
       .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]]);
 
     const { nodes: sankeyNodes, links: sankeyLinks } = sankey({ nodes, links });
 
-    // Filter data for display
     let filteredNodes = [];
     let filteredLinks = [];
 
@@ -112,7 +107,6 @@ const BlogsChart = () => {
         return false;
       });
 
-      // Always include supertopics
       sankeyNodes.forEach(node => {
         if (superTopics.has(node.name)) relatedNodes.add(node.name);
       });
@@ -124,7 +118,6 @@ const BlogsChart = () => {
       filteredLinks = [];
     }
 
-    // Position nodes
     const superTopicNodes = filteredNodes.filter(node => superTopics.has(node.name));
     const superTopicHeight = (height - margin.top - margin.bottom) / superTopicNodes.length;
 
@@ -151,8 +144,8 @@ const BlogsChart = () => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
     svg.attr("viewBox", [0, 0, width, height]);
+    svg.attr("preserveAspectRatio", "xMidYMid meet");
 
-    // Draw links
     svg
       .append("g")
       .attr("fill", "none")
@@ -167,10 +160,9 @@ const BlogsChart = () => {
         return `M${sourceX},${sourceY} C${(sourceX + targetX) / 2},${sourceY} ${(sourceX + targetX) / 2},${targetY} ${targetX},${targetY}`;
       })
       .attr("stroke", "#F5C638")
-      .attr("stroke-width", (d) => Math.max(1, d.width * 0.7))
+      .attr("stroke-width", d => Math.max(1, d.width * 0.7))
       .attr("stroke-opacity", 0.8);
 
-    // Draw nodes as circles
     const nodeGroups = svg
       .append("g")
       .selectAll("g")
@@ -182,7 +174,6 @@ const BlogsChart = () => {
         const containerRect = containerRef.current?.getBoundingClientRect();
         const maxLeft = containerRect ? containerRect.width - 250 : 0;
         const maxTop = containerRect ? containerRect.height - 50 : 0;
-
         setTooltip(prev => ({
           ...prev,
           x: Math.min(event.pageX, maxLeft),
@@ -203,7 +194,6 @@ const BlogsChart = () => {
       .attr("opacity", d => selectedSuperTopic && d.name !== selectedSuperTopic && superTopics.has(d.name) ? 0.5 : 1)
       .style("cursor", d => superTopics.has(d.name) ? "pointer" : "default");
 
-    // Text labels
     nodeGroups
       .append("text")
       .attr("dy", 4)
@@ -220,7 +210,6 @@ const BlogsChart = () => {
         const containerRect = containerRef.current?.getBoundingClientRect();
         const maxLeft = containerRect ? containerRect.width - 320 : 0;
         const maxTop = containerRect ? containerRect.height - 150 : 0;
-
         setTooltip(prev => ({
           ...prev,
           x: Math.min(event.pageX, maxLeft),
@@ -234,7 +223,7 @@ const BlogsChart = () => {
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="w-full p-4 overflow-x-auto bg-transparent relative" ref={containerRef}>
+    <div className="w-full h-[90vh] p-4 overflow-auto bg-transparent relative" ref={containerRef}>
       {tooltip.visible && (
         <div
           className="absolute bg-gray-900/90 text-white p-3 rounded-lg shadow-xl z-50 pointer-events-none"
@@ -248,7 +237,7 @@ const BlogsChart = () => {
         />
       )}
 
-      <svg ref={svgRef} className="w-full h-[800px]" />
+      <svg ref={svgRef} className="w-full h-full" />
     </div>
   );
 };
