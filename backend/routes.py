@@ -3,6 +3,59 @@ from config import db
 import time
 
 
+supertopics = {
+    "codeforces round": "Competitive Programming",
+    "contest solutions": "Competitive Programming",
+    "programming contests": "Competitive Programming",
+    "hackerrank problems": "Competitive Programming",
+    "online judges": "Competitive Programming",
+    "codeforces problems": "Competitive Programming",
+    "programming challenges": "Competitive Programming",
+    "dynamic programming": "Algorithms & Data Structures",
+    "graph theory": "Algorithms & Data Structures",
+    "data structures": "Algorithms & Data Structures",
+    "recursion techniques": "Algorithms & Data Structures",
+    "problem solving": "Algorithms & Data Structures",
+    "vs code extension": "Development Tools",
+    "programming tools": "Development Tools",
+    "code compilation": "Development Tools",
+    "programming environment": "Development Tools",
+    "code formatting": "Development Tools",
+    "code submission": "Development Tools",
+    "code optimization": "Code Optimization",
+    "time complexity": "Code Optimization",
+    "memory management": "Code Optimization",
+    "code efficiency": "Code Optimization",
+    "code validation": "Code Optimization",
+    "code analysis": "Code Optimization",
+    "code practices": "Code Optimization",
+    "competitive programming": "Educational Resources",
+    "programming tutorials": "Educational Resources",
+    "programming education": "Educational Resources",
+    "programming resources": "Educational Resources",
+    "code examples": "Educational Resources",
+    "contest preparation": "Educational Resources",
+    "codeforces api": "Educational Resources",
+    "test cases": "Debugging & Testing",
+    "code debugging": "Debugging & Testing",
+    "runtime errors": "Debugging & Testing",
+    "code verification": "Debugging & Testing",
+    "problem statements": "Debugging & Testing",
+    "programming community": "Community & Processes",
+    "contest strategies": "Community & Processes",
+    "rating system": "Community & Processes",
+    "code plagiarism": "Community & Processes",
+    "programming workflow": "Community & Processes",
+    "programming paradigms": "Theoretical Foundations",
+    "programming logic": "Theoretical Foundations",
+    "algorithm analysis": "Theoretical Foundations",
+    "computational math": "Theoretical Foundations",
+    "programming concepts": "Theoretical Foundations",
+    "programming languages": "Theoretical Foundations",
+    "code structure": "Theoretical Foundations"
+}
+
+
 def timed_cache(seconds):
     def decorator(func):
         @lru_cache(maxsize=None)
@@ -198,7 +251,8 @@ def get_blog_topics_data():
         "topic": item[0],
         "avg_rating": item[1],
         "avg_number_of_comments": item[2],
-        "number_of_blogs": item[3]
+        "number_of_blogs": item[3],
+        "supertopic": supertopics[item[0]]
     } for item in topics_data]
 
     return topics_data
