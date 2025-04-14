@@ -1,9 +1,24 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
 
 const TasksSolvabilityChart = () => {
     const [data, setData] = useState([]);
     const chartRef = useRef();
+    const containerRef = useRef();
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    const updateDimensions = useCallback(() => {
+        if (containerRef.current) {
+            const { width, height } = containerRef.current.getBoundingClientRect();
+            setDimensions({ width, height });
+        }
+    }, []);
+
+    useEffect(() => {
+        updateDimensions();
+        window.addEventListener("resize", updateDimensions);
+        return () => window.removeEventListener("resize", updateDimensions);
+    }, [updateDimensions]);
 
     useEffect(() => {
         fetch("http://127.0.0.1:8000/api/topics_solvability")
@@ -16,24 +31,28 @@ const TasksSolvabilityChart = () => {
     }, []);
 
     useEffect(() => {
-        if (!data.length) return;
+        if (!data.length || !dimensions.width || !dimensions.height) return;
 
-        const width = 1300;
-        const height = 800;
-        const cellSize = 120;
+        const { width, height } = dimensions;
+        const cellSize = Math.min(120, width * 0.15);
         const spacing = 20;
-        const columns = Math.floor(width / (cellSize + spacing));
+        const columns = Math.max(1, Math.floor((width - spacing) / (cellSize + spacing)));
+
+        // Вычисление максимальной высоты в зависимости от количества строк и ячеек
+        const rows = Math.ceil(data.length / columns);
+        console.log(rows);
+        const totalHeight = rows * (cellSize + spacing) + cellSize + 30 -spacing;
 
         const svg = d3.select(chartRef.current);
         svg.selectAll("*").remove();
 
         const g = svg
             .attr("width", width)
-            .attr("height", height)
+            .attr("height", totalHeight)  // высота будет зависеть от данных
             .style("display", "block")
             .style("margin", "0 auto")
             .append("g")
-            .attr("transform", `translate(${width / 2 - (columns * (cellSize + spacing)) / 2}, 100)`);
+            .attr("transform", `translate(0, 100)`);
 
         const color = d3.scaleLinear()
             .domain([0.5, 0.85])
@@ -92,7 +111,10 @@ const TasksSolvabilityChart = () => {
                 const col = i % columns;
                 const row = Math.floor(i / columns);
                 const waveOffset = Math.sin(col / columns * Math.PI * 2) * 15;
-                return `translate(${col * (cellSize + spacing)}, ${row * (cellSize + spacing) + waveOffset})`;
+                const x = col * (cellSize + spacing);
+                const y = row * (cellSize + spacing) + waveOffset;
+                const gridWidth = columns * (cellSize + spacing);
+                return `translate(${x + (width - gridWidth)/2}, ${y})`;
             })
             .each(function (d) {
                 const group = d3.select(this);
@@ -159,15 +181,19 @@ const TasksSolvabilityChart = () => {
             .attr("x", width / 2)
             .attr("y", 40)
             .attr("text-anchor", "middle")
-            .style("font-size", "32px")
+            .style("font-size", "clamp(24px, 3vw, 32px)")
             .style("font-weight", "bold")
             .attr("fill", "#ffffff")
             .text("🔥 Topic Solvability Heat Map 🔥");
 
         return () => tooltip.remove();
-    }, [data]);
+    }, [data, dimensions]);
 
-    return <svg ref={chartRef}></svg>;
+    return (
+        <div ref={containerRef} style={{ width: "100%", height: "100%", minHeight: "500px" }}>
+            <svg ref={chartRef} width={dimensions.width} height={dimensions.height} />
+        </div>
+    );
 };
 
 export default TasksSolvabilityChart;
