@@ -1,5 +1,6 @@
 from functools import lru_cache
 from config import db
+import numpy as np
 import time
 
 supertopics = {
@@ -160,18 +161,29 @@ def get_rating_distribution_by_experience():
         """
     )).all()
 
-    rated_experience = [{
-        "rating": item[0],
-        "time_registration_years": item[1]
-    } for item in rated_experience]
+    rated_experience = np.array(rated_experience, dtype='float32')
+
+    rating = rated_experience[:, 0]
+    experience = rated_experience[:, 1]
+
+    correlation = np.corrcoef(rating, experience)[0, 1]
+
+    rated_experience = {
+        "rating_experience_correlation": correlation,
+        "data": [{
+            "rating": float(item[0]),
+            "time_registration_years": float(item[1])
+        } for item in rated_experience]
+    }
+
     return rated_experience
 
 
 @timed_cache(seconds=3600*24)
 def get_rating_distribution_by_solutions_amount():
-    rated_solution_number = db.session.execute(db.text(
+    rated_solutions_number = db.session.execute(db.text(
         """
-        SELECT p.new_rating AS rating, count(*) AS number_of_solutions, p.user_handle
+        SELECT p.new_rating AS rating, count(*) AS number_of_solutions
         FROM participations AS p
         JOIN solutions AS s ON p.user_handle = s.user_handle
         WHERE p.rating_change <= 250
@@ -179,11 +191,21 @@ def get_rating_distribution_by_solutions_amount():
         ORDER BY p.new_rating
         """
     )).all()
+    rated_solutions_number = np.array(rated_solutions_number, dtype='float32')
 
-    rated_solutions_number = [{
-        "rating": item[0],
-        "number_of_solved_problems": item[1]
-    } for item in rated_solution_number]
+    rating = rated_solutions_number[:, 0]
+    solutions_number = rated_solutions_number[:, 1]
+
+    correlation = np.corrcoef(rating, solutions_number)[0, 1]
+
+    rated_solutions_number = {
+        "rating_solutions_count_correlation": correlation,
+        "data": [{
+            "rating": float(item[0]),
+            "number_of_solved_problems": float(item[1])
+        } for item in rated_solutions_number]
+    }
+
     return rated_solutions_number
 
 
@@ -192,7 +214,7 @@ def get_rating_distribution_by_solutions_rating():
     rating_correlation = db.session.execute(db.text(
         """
         SELECT pt.new_rating AS rating,
-                AVG(pb.rating) AS avg_solutions_rating, pt.user_handle
+                AVG(pb.rating) AS avg_solutions_rating
         FROM participations AS pt
         JOIN solutions AS s ON pt.user_handle = s.user_handle
         JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
@@ -201,11 +223,20 @@ def get_rating_distribution_by_solutions_rating():
         ORDER BY pt.new_rating
         """
     )).all()
+    rating_correlation = np.array(rating_correlation, dtype='float32')
 
-    rating_correlation = [{
-        "rating": item[0],
-        "avg_rating_of_solved_problems": item[1]
-    } for item in rating_correlation]
+    user_rating = rating_correlation[:, 0]
+    problem_rating = rating_correlation[:, 1]
+
+    correlation = np.corrcoef(user_rating, problem_rating)[0, 1]
+
+    rating_correlation = {
+        "rating_correlation": correlation,
+        "data": [{
+            "rating": float(item[0]),
+            "avg_rating_of_sovled_problems": float(item[1])
+        } for item in rating_correlation]
+    }
 
     return rating_correlation
 
@@ -215,8 +246,7 @@ def get_rating_distribution_by_solutions_solvability():
     rated_solvability = db.session.execute(db.text(
         """
         SELECT pt.new_rating AS rating,
-                AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability,
-                pt.user_handle
+                AVG(pb.success_trials::DECIMAL / NULLIF(pb.success_trials + pb.unsuccess_trials, 0)) AS avg_solutions_solvability
         FROM participations AS pt
         JOIN solutions AS s ON pt.user_handle = s.user_handle
         JOIN problems AS pb ON s.problem_contest_id = pb.contest_id AND s.problem_index = pb.index
@@ -225,11 +255,20 @@ def get_rating_distribution_by_solutions_solvability():
         ORDER BY pt.new_rating
         """
     )).all()
+    rated_solvability = np.array(rated_solvability, dtype='float32')
 
-    rated_solvability = [{
-        "rating": item[0],
-        "avg_solvability_of_solved_problems": item[1]
-    } for item in rated_solvability]
+    rating = rated_solvability[:, 0]
+    solvability = rated_solvability[:, 1]
+
+    correlation = np.corrcoef(solvability, rating)[0, 1]
+
+    rated_solvability = {
+        "rating_solvability_correlation": correlation,
+        "data": [{
+            "rating": float(item[0]),
+            "avg_solvability_of_solved_problems": float(item[1])
+        } for item in rated_solvability]
+    }
 
     return rated_solvability
 
