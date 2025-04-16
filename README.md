@@ -68,6 +68,8 @@ We aim to create a website that will reflect the dependence of the development o
   <em>Main topics of codeforce blogs and their subtopics</em>
 </p>
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Roadmap
 
 **Week 1:** Design generation  
@@ -79,6 +81,7 @@ We aim to create a website that will reflect the dependence of the development o
 **Week 7:** Implementation of interactive features, panel integration, advanced feature development  
 **Week 8:** Final testing, polishing, presentation preparation
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Structure
 
