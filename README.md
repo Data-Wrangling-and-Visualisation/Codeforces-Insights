@@ -25,6 +25,12 @@
     <li>
       <a href="#roadmap">Roadmap</a>
     </li>
+    <li>
+      <a href="#website-appearance">Website appearance</a>
+    </li>
+    <li>
+      <a href="#project-structure">Project structure</a>
+    </li>
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#launch-the-project">Launch the project</a></li>
     <ul>
@@ -42,16 +48,65 @@ We aim to create a website that will reflect the dependence of the development o
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Website appearance
+
+<p align="center">
+  <img src="main_screen.png" alt="Project Structure" width="600"/>
+  <br>
+  <em>Main screen</em>
+</p>
+
+<p align="center">
+  <img src="user_rating.png" alt="Project Structure" width="600"/>
+  <br>
+  <em>Graph of user rating dependence on registration date</em>
+</p>
+
+<p align="center">
+  <img src="blogs.png" alt="Project Structure" width="600"/>
+  <br>
+  <em>Main topics of codeforce blogs and their subtopics</em>
+</p>
+
 ## Roadmap
 
- <span style="color:rgb(171, 128, 0);"> Week 1: </span> Design generation
- <span style="color:rgb(171, 128, 0);">Week 2: </span> Scraping data, data preprocessing, filling the database
- <span style="color:rgb(171, 128, 0);">Week 3: </span> Visualization planning, Flask API development
- <span style="color:rgb(171, 128, 0);">Week 4: </span> LLM creation or choice
- <span style="color:rgb(171, 128, 0);">Week 5: </span> Frontend implementation
- <span style="color:rgb(171, 128, 0);">Week 6: </span> Implementation of core visualizations in D3.js and basic chart integrations
- <span style="color:rgb(171, 128, 0);">Week 7: </span> Implementation of interactive features, panel integration, advanced feature development
- <span style="color:rgb(171, 128, 0);">Week 8: </span> Final testing, polishing, presentation preparation
+**Week 1:** Design generation  
+**Week 2:** Scraping data, data preprocessing, filling the database  
+**Week 3:** Visualization planning, Flask API development  
+**Week 4:** LLM creation or choice  
+**Week 5:** Frontend implementation  
+**Week 6:** Implementation of core visualizations in D3.js and basic chart integrations  
+**Week 7:** Implementation of interactive features, panel integration, advanced feature development  
+**Week 8:** Final testing, polishing, presentation preparation
+
+
+## Project Structure
+
+```plaintext
+CF-INSIGHTS-LAST/
+├── backend/                     # Backend application (FastAPI)
+│   ├── app.py                   # Main application entry point
+│   ├── config.py                # Project configuration settings
+│   ├── models.py                # Data models definitions
+│   ├── routes.py                # API routes definitions
+│   ├── swagger.yml              # API documentation (Swagger format)
+│   ├── requirements.txt         # Python dependencies list
+│   ├── .env                     # Environment variables for backend
+│   └── exploratory_data_analysis/ # Data analysis and research scripts
+│
+├── frontend/                    # Frontend application (React + Tailwind CSS)
+│   ├── public/                  # Static assets
+│   ├── src/                     # Frontend source code
+│   ├── package.json             # Frontend dependencies and scripts
+│   ├── tailwind.config.js       # Tailwind CSS configuration
+│   ├── postcss.config.js        # PostCSS configuration
+│   └── .env                     # Environment variables for frontend
+│
+├── README.md                    # Project documentation
+└── .gitignore                   # List of files and folders ignored by Git
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Built With
 
