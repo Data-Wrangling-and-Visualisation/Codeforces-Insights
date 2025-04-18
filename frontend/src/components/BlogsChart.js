@@ -49,6 +49,8 @@ const BlogsChart = () => {
         ${isSuperTopic ? `<div>Subtopics: ${relatedData.length}</div>` : ''}
         <div>Blogs: ${totalBlogs}</div>
         ${!isSuperTopic ? `<div>Main Topic: ${relatedData[0]?.supertopic}</div>` : ''}
+        ${!isSuperTopic ? `<div>Avg number of comments: ${relatedData[0]?.avg_number_of_comments.toFixed(2)}</div>` : ''}
+        ${!isSuperTopic ? `<div>Avg rating: ${relatedData[0]?.avg_rating.toFixed(2)}</div>` : ''}
       `,
       x: Math.min(event.pageX, maxLeft),
       y: Math.min(event.pageY - 10, maxTop)
