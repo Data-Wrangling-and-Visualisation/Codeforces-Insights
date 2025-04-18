@@ -234,7 +234,7 @@ def get_rating_distribution_by_solutions_rating():
         "rating_correlation": correlation,
         "data": [{
             "rating": float(item[0]),
-            "avg_rating_of_sovled_problems": float(item[1])
+            "avg_rating_of_solved_problems": float(item[1])
         } for item in rating_correlation]
     }
 

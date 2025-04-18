@@ -106,7 +106,7 @@ const UserRatingChart = () => {
   const fetchData = async (type) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/users_rating_distribution_by_${type}`);
-      const result = await response.json();
+      const result = (await response.json()).data;
       if (type === "experience") {
         setData(calculateBoxplotDataExperience(result));
       } else if (type === "solutions_amount") {
