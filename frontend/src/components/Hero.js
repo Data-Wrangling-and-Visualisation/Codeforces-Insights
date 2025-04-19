@@ -1,9 +1,12 @@
-// src/components/Hero.tsx
+// src/components/Hero.js
 import React from "react";
+import Timeline from "./Timeline"; // Импортируем компонент Timeline
 
 const Hero = () => {
   return (
-    <section className="relative text-center py-20 px-4 overflow-hidden bg-[#031323] mt-10">
+    <section className="relative px-4 overflow-hidden bg-[#031323] mt-10">
+      {/* Обертка для текста с эллипсами */}
+      <div className="relative text-center py-20 px-4 overflow-hidden bg-[#031323] mt-10">
       {/* SVG circles as background */}
       <img
         src="/assets/images/red_ellipse.svg"
@@ -33,6 +36,11 @@ const Hero = () => {
         <p className="text-customYellow mt-4 text-lg">
           Discover hidden patterns and analyze trends of competitive programming like never before!
         </p>
+      </div>
+    </div>
+
+      <div className="mt-24">
+        <Timeline />
       </div>
     </section>
   );

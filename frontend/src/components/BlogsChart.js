@@ -18,6 +18,13 @@ const BlogsChart = () => {
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();
         setData(result);
+
+        // NEW: Set default selected supertopic
+        if (result.length > 0) {
+          const firstSuperTopic = result[0].supertopic;
+          setSelectedSuperTopic(firstSuperTopic);
+        }
+
       } catch (err) {
         setError(err.message);
       } finally {

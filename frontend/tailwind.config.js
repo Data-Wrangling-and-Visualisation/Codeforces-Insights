@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: 'jit',
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
@@ -12,6 +13,11 @@ module.exports = {
         customRed: '#AB1E24',
         customBlue: '#127FC2',
       },
+    },
+  },
+  variants: {
+    extend: {
+      scale: ['hover'],
     },
   },
   plugins: [],

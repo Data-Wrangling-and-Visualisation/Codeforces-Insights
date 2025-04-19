@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import React, { useEffect, useRef, useState } from "react";
 
-const UserRatingChart = () => {
+const UserRatingChart = ({ chartType, setChartType }) => {
   const svgRef = useRef();
   const [data, setData] = useState([]);
-  const [chartType, setChartType] = useState("experience");
+  // const [chartType, setChartType] = useState("experience");
 
   const calculateBoxplotDataExperience = (data) => {
     const groupedData = d3.group(data, d => d.time_registration_years);
