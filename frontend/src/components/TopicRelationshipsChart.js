@@ -2,17 +2,18 @@ import {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
 
 const TopicRelationshipsChart = () => {
+
+    const capitalize = (str) => {
+        if (str.length === 0) return str;
+        return str[0].toUpperCase() + str.slice(1).toLowerCase();
+    };
+
     const svgRef = useRef();
+    const tooltipRef = useRef();
     const [nodes, setNodes] = useState([]);
     const [links, setLinks] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [simulation, setSimulation] = useState(null);
-    const [tooltip, setTooltip] = useState({
-        visible: false,
-        content: '',
-        x: 0,
-        y: 0
-    });
 
     const nodeSizeScale = d3.scaleLog()
         .base(10)
@@ -20,10 +21,10 @@ const TopicRelationshipsChart = () => {
         .range([15, 60])
         .clamp(true);
 
-    const lineWidthScale = d3.scaleLinear()
-    .domain([0, 15000])  // Диапазон значений количества задач
-    .range([1, 10])      // Соответствие толщины линий
-    .clamp(true);
+    const globalLineWidthScale = d3.scaleLinear()
+        .domain([0, 15000])
+        .range([1, 10])
+        .clamp(true);
 
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/topics_correlation')
@@ -66,7 +67,29 @@ const TopicRelationshipsChart = () => {
                 setNodes(nodes);
                 setLinks(links);
             });
+
+        tooltipRef.current = d3.select("body")
+            .append("div")
+            .attr("class", "chart-tooltip")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background", "#222")
+            .style("color", "#fff")
+            .style("padding", "14px 18px")
+            .style("border-radius", "8px")
+            .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
+            .style("pointer-events", "none")
+            .style("font-size", "16px")
+            .style("z-index", "1000");
+
+        return () => {
+            // Удаляем тултип при размонтировании
+            if (tooltipRef.current) tooltipRef.current.remove();
+        };
+
     }, []);
+
+    const GLOW_FILTER_ID = 'glow-filter';
 
     useEffect(() => {
         if (!nodes.length) return;
@@ -74,6 +97,24 @@ const TopicRelationshipsChart = () => {
         const svg = d3.select(svgRef.current);
         const {width, height} = svg.node().getBoundingClientRect();
         svg.selectAll('*').remove();
+
+        const defs = svg.append('defs');
+
+        const glowFilter = defs.append('filter')
+            .attr('id', GLOW_FILTER_ID)
+            .attr('x', '-20%')
+            .attr('y', '-20%')
+            .attr('width', '150%')
+            .attr('height', '150%')
+            .attr('filterUnits', 'userSpaceOnUse'); // Важно!
+
+        glowFilter.append('feGaussianBlur')
+            .attr('stdDeviation', '10')
+            .attr('result', 'coloredBlur');
+
+        const feMerge = glowFilter.append('feMerge');
+        feMerge.append('feMergeNode').attr('in', 'coloredBlur');
+        feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
         const forceSimulation = d3.forceSimulation(nodes)
             .force('charge', d3.forceManyBody().strength(d =>
@@ -123,12 +164,27 @@ const TopicRelationshipsChart = () => {
                 .slice(0, 5)
             : [];
 
+        const maxLinkValue = selectedTopic
+            ? d3.max(filteredLinks, d => d.value)
+            : 0;
+
+        const lineWidthScaleLocal = d3.scaleLinear()
+            .domain([0, maxLinkValue])
+            .range([1, 10])
+            .clamp(true);
+
         const link = svg.selectAll('.link')
-    .data(filteredLinks)
-    .enter().append('line')
-    .attr('stroke', '#F5C638')
-    .attr('stroke-width', d => lineWidthScale(d.value)) // Здесь используется значение связи
-    .attr('stroke-opacity', 0.6);
+            .data(filteredLinks)
+            .enter().append('line')
+            .attr('shape-rendering', 'geometricPrecision')
+            .attr('stroke', '#F5C638')
+            .attr('stroke-width', d =>
+                selectedTopic
+                    ? lineWidthScaleLocal(d.value) // Локальная нормализация
+                    : globalLineWidthScale(d.value) // Глобальная шкала
+            )
+            .attr('stroke-opacity', 0.9)
+            .attr('filter', `url(#${GLOW_FILTER_ID})`) // Применяем фильтр;
 
         const node = svg.selectAll('.node')
             .data(nodes)
@@ -141,40 +197,41 @@ const TopicRelationshipsChart = () => {
         node.append('circle')
             .attr('r', d => nodeSizeScale(d.weight))
             .attr('fill', d => d.linked ? '#F5C638' : '#666')
-            .attr('stroke', d => d.id === selectedTopic ? '#ff4444' : '#fff')
             .on('click', handleNodeClick)
             .on('mouseover', function (event, d) {
-                setTooltip({
-                    visible: true,
-                    content: `${d.id}\nЗадач: ${d.weight}`,
-                    x: event.clientX + 10,
-                    y: event.clientY + 10,
-                });
+                tooltipRef.current
+                    .html(`<strong>${capitalize(d.id)}</strong><br/>Problems: ${d.weight}`)
+                    .style("visibility", "visible")
+                    .style("left", `${event.pageX + 15}px`)
+                    .style("top", `${event.pageY - 15}px`);
             })
             .on('mousemove', function (event) {
-                setTooltip(prev => ({
-                    ...prev,
-                    x: event.clientX + 10,
-                    y: event.clientY + 10,
-                }));
+                tooltipRef.current
+                    .style("left", `${event.pageX + 15}px`)
+                    .style("top", `${event.pageY - 15}px`);
             })
             .on('mouseout', function () {
-                setTooltip(prev => ({...prev, visible: false}));
+                tooltipRef.current.style("visibility", "hidden");
             })
             .on('mousedown', function (event, d) {
-                setTooltip(prev => ({...prev, visible: false}));  // Скрываем при клике
+                tooltipRef.current.style("visibility", "hidden");  // Скрываем при клике
             });
 
         const texts = svg.selectAll('.label')
             .data(nodes)
             .enter().append('text')
             .attr('class', 'label')
-            .text(d => d.id)
-            .style('font-size', '12px')
+            .text(d => capitalize(d.id))
+            .style('font-size', '14px')
             .style('fill', '#fff')
             .style('pointer-events', 'none')
             .style('font-weight', 'bold')
-            .style('text-shadow', '2px 2px 4px rgba(0,0,0,0.7)');
+            .style('text-shadow', '2px 2px 4px rgba(0,0,0,0.7)')
+            .attr('text-anchor', d => {
+                const radius = nodeSizeScale(d.weight);
+                const xPos = Math.max(radius, Math.min(width - radius, d.x));
+                return xPos > width / 2 ? 'end' : 'start';
+            });
 
         forceSimulation.on('tick', () => {
             nodes.forEach(d => {
@@ -191,25 +248,33 @@ const TopicRelationshipsChart = () => {
 
             node.attr('transform', d => `translate(${d.x},${d.y})`);
 
-            texts
-                .attr('x', d => {
-                    const radius = nodeSizeScale(d.weight);
-                    const xPos = Math.max(radius, Math.min(width - radius, d.x));
-                    const anchor = xPos > width / 2 ? 'end' : 'start';
+            texts.each(function (d) {
+                const text = d3.select(this);
+                const bbox = this.getBBox();
+                const radius = nodeSizeScale(d.weight);
+                const padding = 5;
 
-                    return anchor === 'end'
-                        ? Math.min(xPos + radius / 2, width - 5)  // Уменьшили смещение
-                        : Math.max(xPos - radius / 2, 5);
-                })
-                .attr('y', d => {
-                    const radius = nodeSizeScale(d.weight);
-                    let yPos = d.y - radius / 2 - 5;  // Изменили позиционирование по вертикали
-                    return Math.max(20, Math.min(height - 20, yPos));
-                });
+                let xPos = d.x;
+                let yPos = d.y - radius - 5;
+
+                // Проверка горизонтальных границ
+                if (xPos - bbox.width / 2 < padding) {
+                    xPos = bbox.width / 2 + padding;
+                } else if (xPos + bbox.width / 2 > width - padding) {
+                    xPos = width - bbox.width / 2 - padding;
+                }
+
+                // Проверка вертикальных границ
+                yPos = Math.max(padding + bbox.height, Math.min(height - padding, yPos));
+
+                text.attr('x', xPos)
+                    .attr('y', yPos)
+                    .attr('text-anchor', 'middle');
+            });
         });
 
         function dragStarted(event, d) {
-            setTooltip(prev => ({...prev, visible: false}));
+            tooltipRef.current.style("visibility", "hidden");
             if (!event.active) forceSimulation.alphaTarget(0.3).restart();
             d.fx = d.x;
             d.fy = d.y;
@@ -222,7 +287,7 @@ const TopicRelationshipsChart = () => {
         }
 
         function dragEnded(event, d) {
-            setTooltip(prev => ({...prev, visible: false}));
+            tooltipRef.current.style("visibility", "hidden");
             if (!event.active) forceSimulation.alphaTarget(0);
             d.fx = null;
             d.fy = null;
@@ -234,37 +299,15 @@ const TopicRelationshipsChart = () => {
     }, [nodes, links, selectedTopic]);
 
     return (
-        <>
-            <svg
-                ref={svgRef}
-                width="100%"
-                height="800"
-                style={{
-                    borderRadius: '8px',
-                    margin: '20px'
-                }}
-            />
-
-            <div
-                style={{
-                    position: 'fixed',
-                    left: tooltip.x,
-                    top: tooltip.y,
-                    display: tooltip.visible ? 'block' : 'none',
-                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                    color: 'white',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    pointerEvents: 'none',
-                    fontSize: '14px',
-                    whiteSpace: 'pre',
-                    zIndex: 1000,
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                }}
-            >
-                {tooltip.content}
-            </div>
-        </>
+        <svg
+            ref={svgRef}
+            width="100%"
+            height="800"
+            style={{
+                borderRadius: '8px',
+                margin: '20px'
+            }}
+        />
     );
 };
 
