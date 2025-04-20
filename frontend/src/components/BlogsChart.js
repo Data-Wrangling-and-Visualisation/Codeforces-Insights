@@ -96,7 +96,7 @@ const BlogsChart = () => {
         const container = containerRef.current;
         const width = container.offsetWidth;
         const height = window.innerHeight * 0.9;
-        const margin = {top: 20, right: width * 0.2, bottom: 20, left: width * 0.2};
+        const margin = {top: 60, right: width * 0.2, bottom: 20, left: width * 0.2};
 
         const nodesMap = new Map();
         const links = [];
@@ -198,7 +198,27 @@ const BlogsChart = () => {
             .attr("stroke-width", d => Math.max(1, d.width * 0.7))
             .attr("stroke-opacity", d =>
                 hoveredNode && (d.source.name === hoveredNode || d.target.name === hoveredNode) ? 1 : 0.3
-            );
+            )
+            
+
+        // Добавляем заголовки "Topics" и "Subtopics"
+        svg.append("text")
+        .attr("x", margin.left / 2)
+        .attr("y", 30)
+        .text("Topics")
+        .attr("fill", "#F5C638")
+        .attr("font-size", "20px")
+        .attr("font-weight", "bold")
+        .attr("text-anchor", "start");
+
+        svg.append("text")
+        .attr("x", width - margin.right / 2)
+        .attr("y", 30)
+        .text("Subtopics")
+        .attr("fill", "#F5C638")
+        .attr("font-size", "20px")
+        .attr("font-weight", "bold")
+        .attr("text-anchor", "end");
 
         const nodeGroups = svg
             .append("g")

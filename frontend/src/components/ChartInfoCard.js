@@ -71,10 +71,10 @@ const ChartInfoCard = ({ chartType, setChartType }) => {
   return (
     <div className="backdrop-blur-md bg-white/10 border border-white/30 text-white rounded-2xl shadow-xl p-6 transition duration-300 hover:shadow-2xl">
       <h2 className="text-2xl font-bold mb-3 flex items-center">
-        <span className="text-yellow-400 mr-2">{rank}.</span>
+        <span className="text-customYellow mr-2">{rank}.</span>
         <span>{chartDescriptions[chartType].title}</span>
         {(isMost || isLeast) && (
-          <span className="ml-auto text-yellow-300 text-sm font-normal text-white/90">
+          <span className="ml-auto text-customYellow text-sm font-normal">
             {isMost ? "(Has the most influence)" : "(Has the least influence)"}
           </span>
         )}
@@ -105,7 +105,7 @@ const ChartInfoCard = ({ chartType, setChartType }) => {
               ]
             )
           }
-          className="bg-white text-black font-bold py-2 px-3 rounded-full hover:bg-yellow-300 transition"
+          className="bg-white text-black font-bold py-2 px-3 rounded-full hover:bg-customYellow transition"
         >
           ←
         </button>
@@ -115,7 +115,7 @@ const ChartInfoCard = ({ chartType, setChartType }) => {
               chartTypes[(chartTypes.indexOf(chartType) + 1) % chartTypes.length]
             )
           }
-          className="bg-white text-black font-bold py-2 px-3 rounded-full hover:bg-yellow-300 transition"
+          className="bg-white text-black font-bold py-2 px-3 rounded-full hover:bg-customYellow transition"
         >
           →
         </button>

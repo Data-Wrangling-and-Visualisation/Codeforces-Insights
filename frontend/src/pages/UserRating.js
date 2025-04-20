@@ -29,14 +29,14 @@ const UserRating = () => {
       <div className="w-full flex justify-between mt-6">
         <Link
           to="/topic-relationships"
-          className="text-white text-lg font-semibold hover:text-yellow-300 transition"
+          className="text-white text-lg font-semibold hover:text-customYellow transition"
         >
           ← Go to previous step
         </Link>
 
         <Link
           to="/blogs"
-          className="text-white text-lg font-semibold hover:text-yellow-300 transition"
+          className="text-white text-lg font-semibold hover:text-customYellow transition"
         >
           Go to next step →
         </Link>
