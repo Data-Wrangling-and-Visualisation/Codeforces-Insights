@@ -140,7 +140,7 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       if (type === "experience") return "Experience (Years)";
       if (type === "solutions_amount") return "Solved Problems (0-200, 201-400, etc.)";
       if (type === "solutions_rating") return "Average Rating of Solved Problems (0-200, etc.)";
-      if (type === "solutions_solvability") return "Avg Solvability of Solved Problems (0.0 - 1.0)";
+      if (type === "solutions_solvability") return "Avg Solvability of Tasks (0.0 - 1.0)";
     }
 
     const svg = d3.select(svgRef.current);
@@ -203,7 +203,7 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       .attr("y", d => y(d.q3))
       .attr("width", x.bandwidth())
       .attr("height", d => y(d.q1) - y(d.q3))
-      .attr("fill", "#127FC2")
+      .attr("fill", "#263b4a")
       .attr("stroke", "#F5C638")
       .attr("stroke-width", 2);
 
@@ -269,27 +269,27 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       <div className="flex flex-col items-stretch w-1/4 space-y-4 mt-10">
         <button
           onClick={() => setChartType("solutions_rating")}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
+          className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
           Solutions Rating
         </button>
         <button
           onClick={() => setChartType("solutions_amount")}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
+          className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
           Solutions Amount
         </button>
         <button
           onClick={() => setChartType("experience")}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
+          className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
           Experience
         </button>
         <button
           onClick={() => setChartType("solutions_solvability")}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
+          className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
-          Solutions Solvability
+          Tasks Solvability
         </button>
       </div>
     </div>

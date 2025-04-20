@@ -20,7 +20,7 @@ const steps = [
   },
   {
     step: 4,
-    text: "Join the site's community - find out what sompetitive programmers are discussing.",
+    text: "Join the site's community - find out what competitive programmers are discussing.",
     to: "/blogs",
   },
 ];

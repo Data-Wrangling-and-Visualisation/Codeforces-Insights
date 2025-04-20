@@ -15,9 +15,9 @@ const Header = () => {
 
       <nav className="ml-auto">
         <ul className="flex space-x-4 sm:space-x-6 md:space-x-16">
-          <li className="flex justify-center items-center w-full">
-            <Link to="/user-rating" className="hover:text-customYellow text-xs sm:text-xs text-center">
-              USER RATING
+        <li className="flex justify-center items-center w-full">
+            <Link to="/tasks" className="hover:text-customYellow text-xs sm:text-xs text-center">
+              TASKS
             </Link>
           </li>
           <li className="flex justify-center items-center w-full">
@@ -26,8 +26,8 @@ const Header = () => {
             </Link>
           </li>
           <li className="flex justify-center items-center w-full">
-            <Link to="/tasks" className="hover:text-customYellow text-xs sm:text-xs text-center">
-              TASKS
+            <Link to="/user-rating" className="hover:text-customYellow text-xs sm:text-xs text-center">
+              USER RATING
             </Link>
           </li>
           <li className="flex justify-center items-center w-full">

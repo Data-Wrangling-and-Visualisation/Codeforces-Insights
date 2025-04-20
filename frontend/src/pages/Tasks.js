@@ -14,9 +14,16 @@ const Tasks = () => {
 
         <TasksRatingDistributionChart/>
         {/* Ссылка внизу справа */}
-      <div className="w-full flex justify-end mt-6">
+        <div className="w-full flex justify-between mt-6">
         <Link
-          to="/blogs" // замени на нужный путь
+          to="/" // Замени на актуальный маршрут
+          className="text-white text-lg font-semibold hover:text-yellow-300 transition"
+        >
+          ← Go to previous step
+        </Link>
+
+        <Link
+          to="/topic-relationships"
           className="text-white text-lg font-semibold hover:text-yellow-300 transition"
         >
           Go to next step →

@@ -8,19 +8,34 @@ const UserRating = () => {
 
   return (
     <div className="p-8 flex flex-col space-y-8">
-      {/* График */}
-      <div className="flex-1">
-        <UserRatingChart chartType={chartType} setChartType={setChartType} />
-      </div>
+      {/* Заголовок */}
+      <h1 className="text-4xl font-bold text-white text-center py-24">
+        What influences user rating?
+      </h1>
+
 
       {/* Карточка снизу */}
       <div className="w-full">
         <ChartInfoCard chartType={chartType} setChartType={setChartType} />
       </div>
 
-      <div className="w-full flex justify-end mt-6">
+
+      {/* График */}
+      <div className="flex-1">
+        <UserRatingChart chartType={chartType} setChartType={setChartType} />
+      </div>
+
+      
+      <div className="w-full flex justify-between mt-6">
         <Link
           to="/topic-relationships"
+          className="text-white text-lg font-semibold hover:text-yellow-300 transition"
+        >
+          ← Go to previous step
+        </Link>
+
+        <Link
+          to="/blogs"
           className="text-white text-lg font-semibold hover:text-yellow-300 transition"
         >
           Go to next step →

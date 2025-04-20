@@ -11,9 +11,16 @@ const TopicRelationships = () => {
       </div>
 
       {/* Ссылка внизу справа */}
-      <div className="w-full flex justify-end mt-6">
+      <div className="w-full flex justify-between mt-6">
         <Link
-          to="/tasks"
+          to="/tasks" // Замени на актуальный маршрут
+          className="text-white text-lg font-semibold hover:text-yellow-300 transition"
+        >
+          ← Go to previous step
+        </Link>
+
+        <Link
+          to="/user-rating"
           className="text-white text-lg font-semibold hover:text-yellow-300 transition"
         >
           Go to next step →
