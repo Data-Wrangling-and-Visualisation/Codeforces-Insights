@@ -81,6 +81,7 @@ const TasksSolvabilityChart = () => {
                 .attr("font-size", 16)
                 .style("text-shadow", "1px 1px 3px #000")
                 .style("font-weight", "bold")
+                .style("pointer-events", "none")
             ;
 
             const words = text.split(/(\s|-)/);
@@ -177,6 +178,7 @@ const TasksSolvabilityChart = () => {
                     .attr("text-anchor", "middle")
                     .attr("fill", "#ffffff")
                     .attr("font-size", 16)
+                    .style("pointer-events", "none")
                     .style("text-shadow", "1px 1px 3px #000")
                     .style("font-weight", "bold");
             });
