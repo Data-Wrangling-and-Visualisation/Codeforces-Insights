@@ -270,6 +270,12 @@ const UserRatingChart = ({chartType, setChartType}) => {
                     Solutions Rating
                 </button>
                 <button
+                    onClick={() => setChartType("solutions_solvability")}
+                    className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
+                >
+                    Tasks Solvability
+                </button>
+                <button
                     onClick={() => setChartType("solutions_amount")}
                     className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
                 >
@@ -280,12 +286,6 @@ const UserRatingChart = ({chartType, setChartType}) => {
                     className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
                 >
                     Experience
-                </button>
-                <button
-                    onClick={() => setChartType("solutions_solvability")}
-                    className="bg-lightGray hover:bg-yellow-500 text-darkBlue font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
-                >
-                    Tasks Solvability
                 </button>
             </div>
         </div>
