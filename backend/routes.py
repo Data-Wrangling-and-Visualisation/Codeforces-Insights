@@ -254,7 +254,7 @@ def get_rating_distribution_by_experience():
         JOIN user_last_contest AS ulc ON u.handle = ulc.user_handle
         JOIN participations AS p ON u.handle = p.user_handle 
                                   AND p.contest_id = ulc.contest_id
-        WHERE p.rating_change <= 250  # Filter for valid rating changes
+        WHERE p.rating_change <= 250
         ORDER BY p.new_rating
         """
     )).all()
