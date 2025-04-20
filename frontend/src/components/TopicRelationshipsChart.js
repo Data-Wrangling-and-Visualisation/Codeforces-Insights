@@ -1,215 +1,270 @@
-import React, { useEffect, useRef, useState } from "react";
-import * as d3 from "d3";
+import {useEffect, useRef, useState} from 'react';
+import * as d3 from 'd3';
 
 const TopicRelationshipsChart = () => {
     const svgRef = useRef();
     const [nodes, setNodes] = useState([]);
     const [links, setLinks] = useState([]);
-    const [filteredLinks, setFilteredLinks] = useState([]);
+    const [selectedTopic, setSelectedTopic] = useState(null);
+    const [simulation, setSimulation] = useState(null);
+    const [tooltip, setTooltip] = useState({
+        visible: false,
+        content: '',
+        x: 0,
+        y: 0
+    });
+
+    const nodeSizeScale = d3.scaleLog()
+        .base(10)
+        .domain([100, 15000])
+        .range([15, 60])
+        .clamp(true);
+
+    const lineWidthScale = d3.scaleLinear()
+    .domain([0, 15000])  // Диапазон значений количества задач
+    .range([1, 10])      // Соответствие толщины линий
+    .clamp(true);
 
     useEffect(() => {
-        const fetchData = async () => {
-            const res = await fetch("http://127.0.0.1:8000/api/topics_correlation");
-            const data = await res.json();
+        fetch('http://127.0.0.1:8000/api/topics_correlation')
+            .then(response => response.json())
+            .then(data => {
+                const topicWeights = {};
+                const linkMap = new Map();
 
-            const topicsSet = new Set();
-            data.forEach(item => {
-                topicsSet.add(item.topic1);
-                topicsSet.add(item.topic2);
-            });
+                data.forEach(d => {
+                    if (d.topic1 === d.topic2) {
+                        topicWeights[d.topic1] = d.number_of_tasks;
+                        return;
+                    }
 
-            const topics = Array.from(topicsSet).map(topic => ({
-                id: topic,
-                size: data
-                    .filter(item => item.topic1 === topic || item.topic2 === topic)
-                    .reduce((acc, item) => acc + item.number_of_tasks, 0),
-            }));
+                    const [t1, t2] = [d.topic1, d.topic2].sort();
+                    const key = `${t1}|${t2}`;
+                    if (t1 !== t2 && !linkMap.get(key)) {
+                        linkMap.set(key, (linkMap.get(key) || 0) + d.number_of_tasks);
+                        topicWeights[t1] = (topicWeights[t1] || 0) + d.number_of_tasks;
+                        topicWeights[t2] = (topicWeights[t2] || 0) + d.number_of_tasks;
+                    }
+                    ;
+                });
 
-            const edges = data
-                .filter(item => item.number_of_tasks >= 1 && item.topic1 && item.topic2)
-                .map(item => ({
-                    source: item.topic1,
-                    target: item.topic2,
-                    value: item.number_of_tasks,
+                const nodes = Object.entries(topicWeights).map(([id, weight]) => ({
+                    id,
+                    weight: Math.max(100, weight),
+                    linked: false,
+                    x: Math.random() * window.innerWidth, // Случайная X координата
+                    y: Math.random() * window.innerHeight // Случайная Y координата
                 }));
 
-            setNodes(topics);
-            setLinks(edges);
-        };
+                const nodeMap = new Map(nodes.map(n => [n.id, n]));
+                const links = Array.from(linkMap.entries()).map(([key, value]) => ({
+                    source: nodeMap.get(key.split('|')[0]),
+                    target: nodeMap.get(key.split('|')[1]),
+                    value
+                }));
 
-        fetchData();
+                setNodes(nodes);
+                setLinks(links);
+            });
     }, []);
 
     useEffect(() => {
-        if (nodes.length === 0 || links.length === 0) return;
-
-        const filtered = [];
-        // const nodeMap = new Map(nodes.map(node => [node.id, node]));
-
-        nodes.forEach(node => {
-            const nodeLinks = links.filter(link =>
-                link.source === node.id || link.target === node.id
-            );
-
-            const sortedLinks = [...nodeLinks].sort((a, b) => b.value - a.value);
-
-            const topLinks = sortedLinks.slice(0, 2);
-
-            topLinks.forEach(link => {
-                if (!filtered.some(l =>
-                    (l.source === link.source && l.target === link.target) ||
-                    (l.source === link.target && l.target === link.source)
-                )) {
-                    filtered.push(link);
-                }
-            });
-        });
-
-        setFilteredLinks(filtered);
-    }, [nodes, links]);
-
-    useEffect(() => {
-        if (nodes.length === 0 || filteredLinks.length === 0) return;
+        if (!nodes.length) return;
 
         const svg = d3.select(svgRef.current);
-        svg.selectAll("*").remove();
+        const {width, height} = svg.node().getBoundingClientRect();
+        svg.selectAll('*').remove();
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const forceSimulation = d3.forceSimulation(nodes)
+            .force('charge', d3.forceManyBody().strength(d =>
+                d.linked ? -30 : -150
+            ))
+            .force('collision', d3.forceCollide(d => nodeSizeScale(d.weight) + 10))
+            .force('x', d3.forceX(width / 2).strength(d =>
+                d.linked ? 0.05 : 0.01
+            ))
+            .force('y', d3.forceY(height / 2).strength(d =>
+                d.linked ? 0.05 : 0.01
+            ));
 
-        svg
-            .attr("viewBox", `0 0 ${width} ${height}`)
-            .style("background", "none");
+        const handleNodeClick = (event, d) => {
+            const newSelected = d.id === selectedTopic ? null : d.id;
 
-        const container = svg.append("g");
+            nodes.forEach(n => {
+                n.linked = false;
+                n.fx = null;
+                n.fy = null;
+            });
 
-        const simulationNodes = nodes.map(node => ({...node}));
-        const simulationLinks = filteredLinks.map(link => ({
-            ...link,
-            source: simulationNodes.find(n => n.id === link.source),
-            target: simulationNodes.find(n => n.id === link.target)
-        }));
+            if (newSelected) {
+                const mainNode = nodes.find(n => n.id === newSelected);
+                const related = links
+                    .filter(l => l.source.id === newSelected || l.target.id === newSelected)
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 5);
 
-        const simulation = d3.forceSimulation(simulationNodes)
-            .force("link", d3.forceLink(simulationLinks).id(d => d.id)
-                .distance(d => {
-                    return d.value >= 1000 ? 50 : 90;
-                }))
-            // .force("collision", d3.forceCollide().radius(d => 100))
-            .force("charge", d3.forceManyBody().strength(d => d.size > 1000 ? -40 : -80))
-            .force("center", d3.forceCenter(width / 2, height / 2))
-            .stop();
-
-        for (let i = 0; i < 300; ++i) {
-            simulation.tick();
-        }
-
-        const tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("position", "absolute")
-            .style("visibility", "hidden")
-            .style("background", "#222")
-            .style("color", "#fff")
-            .style("padding", "14px 18px")
-            .style("border-radius", "8px")
-            .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
-            .style("pointer-events", "none")
-            .style("font-size", "16px");
-
-        svg.on("mousemove", (event) => {
-            const tooltipNode = tooltip.node();
-            const padding = 15;
-
-            const tooltipWidth = tooltipNode.offsetWidth;
-            const tooltipHeight = tooltipNode.offsetHeight;
-
-            let x = event.pageX + padding;
-            let y = event.pageY + padding;
-
-            if (x + tooltipWidth > window.innerWidth) {
-                x = event.pageX - tooltipWidth - padding;
+                related.forEach(l => {
+                    if (l.source.id === newSelected) l.target.linked = true;
+                    else l.source.linked = true;
+                });
+                mainNode.linked = true;
+                mainNode.fx = width / 2;
+                mainNode.fy = height / 2;
             }
 
-            if (y + tooltipHeight > window.innerHeight) {
-                y = event.pageY - tooltipHeight - padding;
-            }
+            setSelectedTopic(newSelected);
+            forceSimulation.alpha(1).restart();
+        };
 
-            tooltip
-                .style("left", `${x}px`)
-                .style("top", `${y}px`);
+        const filteredLinks = selectedTopic
+            ? links
+                .filter(l => l.source.id === selectedTopic || l.target.id === selectedTopic)
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 5)
+            : [];
+
+        const link = svg.selectAll('.link')
+    .data(filteredLinks)
+    .enter().append('line')
+    .attr('stroke', '#F5C638')
+    .attr('stroke-width', d => lineWidthScale(d.value)) // Здесь используется значение связи
+    .attr('stroke-opacity', 0.6);
+
+        const node = svg.selectAll('.node')
+            .data(nodes)
+            .enter().append('g')
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+
+        node.append('circle')
+            .attr('r', d => nodeSizeScale(d.weight))
+            .attr('fill', d => d.linked ? '#F5C638' : '#666')
+            .attr('stroke', d => d.id === selectedTopic ? '#ff4444' : '#fff')
+            .on('click', handleNodeClick)
+            .on('mouseover', function (event, d) {
+                setTooltip({
+                    visible: true,
+                    content: `${d.id}\nЗадач: ${d.weight}`,
+                    x: event.clientX + 10,
+                    y: event.clientY + 10,
+                });
+            })
+            .on('mousemove', function (event) {
+                setTooltip(prev => ({
+                    ...prev,
+                    x: event.clientX + 10,
+                    y: event.clientY + 10,
+                }));
+            })
+            .on('mouseout', function () {
+                setTooltip(prev => ({...prev, visible: false}));
+            })
+            .on('mousedown', function (event, d) {
+                setTooltip(prev => ({...prev, visible: false}));  // Скрываем при клике
+            });
+
+        const texts = svg.selectAll('.label')
+            .data(nodes)
+            .enter().append('text')
+            .attr('class', 'label')
+            .text(d => d.id)
+            .style('font-size', '12px')
+            .style('fill', '#fff')
+            .style('pointer-events', 'none')
+            .style('font-weight', 'bold')
+            .style('text-shadow', '2px 2px 4px rgba(0,0,0,0.7)');
+
+        forceSimulation.on('tick', () => {
+            nodes.forEach(d => {
+                const radius = nodeSizeScale(d.weight);
+                d.x = Math.max(radius, Math.min(width - radius, d.x));
+                d.y = Math.max(radius, Math.min(height - radius, d.y));
+            });
+
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node.attr('transform', d => `translate(${d.x},${d.y})`);
+
+            texts
+                .attr('x', d => {
+                    const radius = nodeSizeScale(d.weight);
+                    const xPos = Math.max(radius, Math.min(width - radius, d.x));
+                    const anchor = xPos > width / 2 ? 'end' : 'start';
+
+                    return anchor === 'end'
+                        ? Math.min(xPos + radius / 2, width - 5)  // Уменьшили смещение
+                        : Math.max(xPos - radius / 2, 5);
+                })
+                .attr('y', d => {
+                    const radius = nodeSizeScale(d.weight);
+                    let yPos = d.y - radius / 2 - 5;  // Изменили позиционирование по вертикали
+                    return Math.max(20, Math.min(height - 20, yPos));
+                });
         });
 
-        container.append("g")
-            .selectAll("line")
-            .data(simulationLinks)
-            .join("line")
-            .attr("stroke", "#999")
-            .attr("stroke-opacity", 0.6)
-            .attr("stroke-width", d => Math.sqrt(d.value) * 0.5)
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
+        function dragStarted(event, d) {
+            setTooltip(prev => ({...prev, visible: false}));
+            if (!event.active) forceSimulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
 
-        container.append("g")
-            .selectAll("circle")
-            .data(simulationNodes)
-            .join("circle")
-            .attr("r", d => Math.sqrt(d.size) * 0.3)
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .attr("fill", "orange")
-            .style("filter", "drop-shadow(0 0 5px #ff0)")
-            .on("mouseover", (event, d) => {
-                tooltip
-                    .style("visibility", "visible")
-                    .style("transform", "scale(1.2)")
-                    .style("opacity", "1")
-                    .html(`<div><strong>${d.id}</strong></div><div>Tasks: ${d.size}</div>`);
-            })
-            .on("mouseout", () => {
-                tooltip
-                    .style("transform", "scale(1)")
-                    .style("opacity", "0")
-                    .style("visibility", "hidden");
-            });
+        function dragged(event, d) {
+            const radius = nodeSizeScale(d.weight);
+            d.fx = Math.max(radius, Math.min(width - radius, event.x));
+            d.fy = Math.max(radius, Math.min(height - radius, event.y));
+        }
 
-        container.append("g")
-            .selectAll("text")
-            .data(simulationNodes)
-            .join("text")
-            .text(d => d.id)
-            .attr("x", d => d.x)
-            .attr("y", d => d.y)
-            .attr("dx", 15)
-            .attr("dy", 5)
-            .attr("fill", "#ffffff")
-            .attr("font-size", 16)
-            .style("text-shadow", "1px 1px 3px #000")
-            .style("font-weight", "bold")
-            .on("mouseover", (event, d) => {
-                tooltip
-                    .style("visibility", "visible")
-                    .style("transform", "scale(1.2)")
-                    .style("opacity", "1")
-                    .html(`<div><strong>${d.id}</strong></div><div>Tasks: ${d.size}</div>`);
-            })
-            .on("mouseout", () => {
-                tooltip
-                    .style("transform", "scale(1)")
-                    .style("opacity", "0")
-                    .style("visibility", "hidden");
-            });
+        function dragEnded(event, d) {
+            setTooltip(prev => ({...prev, visible: false}));
+            if (!event.active) forceSimulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
 
-        return () => {
-            tooltip.remove();
-        };
-    }, [nodes, filteredLinks]);
+        setSimulation(forceSimulation);
+
+        return () => forceSimulation.stop();
+    }, [nodes, links, selectedTopic]);
 
     return (
-        <div className="p-0 m-0">
-            <svg ref={svgRef} className="w-full h-screen" />
-        </div>
+        <>
+            <svg
+                ref={svgRef}
+                width="100%"
+                height="800"
+                style={{
+                    borderRadius: '8px',
+                    margin: '20px'
+                }}
+            />
+
+            <div
+                style={{
+                    position: 'fixed',
+                    left: tooltip.x,
+                    top: tooltip.y,
+                    display: tooltip.visible ? 'block' : 'none',
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    color: 'white',
+                    padding: '8px',
+                    borderRadius: '4px',
+                    pointerEvents: 'none',
+                    fontSize: '14px',
+                    whiteSpace: 'pre',
+                    zIndex: 1000,
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                }}
+            >
+                {tooltip.content}
+            </div>
+        </>
     );
 };
 
