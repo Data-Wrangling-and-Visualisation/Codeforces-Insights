@@ -80,7 +80,10 @@ const TopicRelationshipsChart = () => {
             .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
             .style("pointer-events", "none")
             .style("font-size", "16px")
-            .style("z-index", "1000");
+            .style("z-index", "1000")
+            .style("left", "-9999px")
+            .style("top", "-9999px")
+        ;
 
         return () => {
             // Удаляем тултип при размонтировании
