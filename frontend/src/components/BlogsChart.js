@@ -34,15 +34,28 @@ const BlogsChart = () => {
         };
     }, []);
 
+    const capitalize = (str) =>
+        str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch("http://127.0.0.1:8000/api/blogs_topics_data");
                 if (!response.ok) throw new Error("Network response was not ok");
                 const result = await response.json();
-                setData(result);
-                if (result.length > 0) {
-                    const firstSuperTopic = result[0].supertopic;
+    
+                // форматируем заголовки
+                const formattedResult = result.map(item => ({
+                    ...item,
+                    supertopic: capitalize(item.supertopic),
+                    topic: capitalize(item.topic)
+                }));
+    
+                setData(formattedResult);
+    
+                if (formattedResult.length > 0) {
+                    const firstSuperTopic = formattedResult[0].supertopic;
                     setSelectedSuperTopic(firstSuperTopic);
                 }
             } catch (err) {
@@ -51,8 +64,10 @@ const BlogsChart = () => {
                 setLoading(false);
             }
         };
+    
         fetchData();
     }, []);
+    
 
     const showTooltip = (event, d) => {
         if (!tooltipRef.current) return;

@@ -85,20 +85,53 @@ const TasksSolvabilityChart = () => {
                 .attr("font-size", "14px");
 
             // Топики
+            // Топики с переносом строк
+            // Топики с переносом строк и ограничением по высоте
+            // Топики с автопереносом и полной высотой (не заходит на прямоугольник)
+            // Топики: многострочный текст, строго ниже прямоугольника
             group.selectAll("text.label")
                 .data(rowData)
                 .enter()
                 .append("text")
                 .attr("class", "label")
-                .text(d => d.topic)
-                .attr("x", (_, i) => i * cellWidth + cellWidth / 2)
-                .attr("y", barHeight + textHeight - 2)
                 .attr("text-anchor", "middle")
-                .attr("dominant-baseline", "hanging")
                 .attr("fill", "#ffffff")
-                .attr("font-size", 16)
+                .attr("font-size", 14)
                 .style("text-shadow", "1px 1px 3px #000")
-                .style("font-weight", "bold");
+                .style("font-weight", "bold")
+                .each(function (d, i) {
+                    const words = d.topic.split(/\s+/);
+                    const lineHeight = 16;
+                    const x = i * cellWidth + cellWidth / 2;
+                    const initialY = barHeight + 24; // гарантированный отступ от прямоугольника
+
+                    let line = [];
+                    let lineNumber = 0;
+                    let tspan = d3.select(this).append("tspan")
+                        .attr("x", x)
+                        .attr("y", initialY)
+                        .attr("dy", "0em");
+
+                    for (let word of words) {
+                        line.push(word);
+                        tspan.text(line.join(" "));
+                        if (tspan.node().getComputedTextLength() > cellWidth - 10) {
+                            line.pop(); // remove last word
+                            tspan.text(line.join(" "));
+                            line = [word];
+                            lineNumber++;
+                            tspan = d3.select(this).append("tspan")
+                                .attr("x", x)
+                                .attr("y", initialY)
+                                .attr("dy", `${lineNumber * 1.1}em`)
+                                .text(word);
+                        }
+                    }
+                });
+
+
+
+
         }
     }, [data]);
 
