@@ -40,7 +40,6 @@ const TasksSolvabilityChart = () => {
 
         // Вычисление максимальной высоты в зависимости от количества строк и ячеек
         const rows = Math.ceil(data.length / columns);
-        console.log(rows);
         const totalHeight = rows * (cellSize + spacing) + cellSize + 30 -spacing;
 
         const svg = d3.select(chartRef.current);

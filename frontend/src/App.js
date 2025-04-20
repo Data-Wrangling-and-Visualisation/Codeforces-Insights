@@ -6,6 +6,7 @@ import UserRating from "./pages/UserRating";
 import TopicRelationships from "./pages/TopicRelationships";
 import Tasks from "./pages/Tasks";
 import Blogs from "./pages/Blogs";
+import ScrollToTop from "./components/ScrollToTop";
 import "./index.css";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <div className="bg-darkBlue text-white min-h-screen relative overflow-hidden">
         <Header />
         <main className="pt-[80px] px-4 font-sans">
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Hero />} />
           <Route path="/user-rating" element={<UserRating />} />

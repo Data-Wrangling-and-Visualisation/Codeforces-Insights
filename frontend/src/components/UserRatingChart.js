@@ -268,10 +268,10 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       <svg ref={svgRef} className="flex-grow"></svg>
       <div className="flex flex-col items-stretch w-1/4 space-y-4 mt-10">
         <button
-          onClick={() => setChartType("experience")}
+          onClick={() => setChartType("solutions_rating")}
           className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
-          Experience
+          Solutions Rating
         </button>
         <button
           onClick={() => setChartType("solutions_amount")}
@@ -280,10 +280,10 @@ const UserRatingChart = ({ chartType, setChartType }) => {
           Solutions Amount
         </button>
         <button
-          onClick={() => setChartType("solutions_rating")}
+          onClick={() => setChartType("experience")}
           className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-full"
         >
-          Solutions Rating
+          Experience
         </button>
         <button
           onClick={() => setChartType("solutions_solvability")}
