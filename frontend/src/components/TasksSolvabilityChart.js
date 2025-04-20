@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, {useEffect, useRef, useState, useCallback} from "react";
 import * as d3 from "d3";
 
 const TasksSolvabilityChart = () => {
     const [data, setData] = useState([]);
     const chartRef = useRef();
     const containerRef = useRef();
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [dimensions, setDimensions] = useState({width: 0, height: 0});
 
     const updateDimensions = useCallback(() => {
         if (containerRef.current) {
-            const { width, height } = containerRef.current.getBoundingClientRect();
-            setDimensions({ width, height });
+            const {width, height} = containerRef.current.getBoundingClientRect();
+            setDimensions({width, height});
         }
     }, []);
 
@@ -33,14 +33,14 @@ const TasksSolvabilityChart = () => {
     useEffect(() => {
         if (!data.length || !dimensions.width || !dimensions.height) return;
 
-        const { width, height } = dimensions;
+        const width = dimensions.width;
         const cellSize = Math.min(120, width * 0.15);
         const spacing = 20;
         const columns = Math.max(1, Math.floor((width - spacing) / (cellSize + spacing)));
 
         // Вычисление максимальной высоты в зависимости от количества строк и ячеек
         const rows = Math.ceil(data.length / columns);
-        const totalHeight = rows * (cellSize + spacing) + cellSize + 30 -spacing;
+        const totalHeight = rows * (cellSize + spacing) + cellSize + 30 - spacing;
 
         const svg = d3.select(chartRef.current);
         svg.selectAll("*").remove();
@@ -63,21 +63,25 @@ const TasksSolvabilityChart = () => {
             .append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
-            .style("text-align", "left")
-            .style("padding", "14px 18px")
-            .style("font", "16px sans-serif")
+            .style("visibility", "hidden")
             .style("background", "#222")
             .style("color", "#fff")
-            .style("border-radius", "12px")
+            .style("padding", "14px 18px")
+            .style("border-radius", "8px")
             .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
             .style("pointer-events", "none")
-            .style("opacity", 0);
+            .style("font-size", "16px");
 
         const maxTextWidth = cellSize - 12;
 
         const wrapText = (text, maxWidth) => {
             const svg = d3.select("body").append("svg").style("position", "absolute").style("left", "-9999px");
-            const tempText = svg.append("text").style("font", "16px sans-serif");
+            const tempText = svg.append("text")
+                .attr("fill", "#ffffff")
+                .attr("font-size", 16)
+                .style("text-shadow", "1px 1px 3px #000")
+                .style("font-weight", "bold")
+            ;
 
             const words = text.split(/(\s|-)/);
             let lines = [];
@@ -113,7 +117,7 @@ const TasksSolvabilityChart = () => {
                 const x = col * (cellSize + spacing);
                 const y = row * (cellSize + spacing) + waveOffset;
                 const gridWidth = columns * (cellSize + spacing);
-                return `translate(${x + (width - gridWidth)/2}, ${y})`;
+                return `translate(${x + (width - gridWidth) / 2}, ${y})`;
             })
             .each(function (d) {
                 const group = d3.select(this);
@@ -128,12 +132,15 @@ const TasksSolvabilityChart = () => {
                     .on("mouseover", function () {
                         d3.select(this).attr("stroke", "black").attr("stroke-width", 2);
                         tooltip
+                            .style("visibility", "visible")
                             .style("opacity", 1)
                             .html(`<strong>${d.topic}</strong><br/>${(d.solvability * 100).toFixed(2)}%`);
                     })
                     .on("mouseout", function () {
                         d3.select(this).attr("stroke", "none");
-                        tooltip.style("opacity", 0);
+                        tooltip
+                            .style("visibility", "hidden")
+                            .style("opacity", 0);
                     })
                     .on("mousemove", function (event) {
                         const padding = 15;
@@ -169,10 +176,9 @@ const TasksSolvabilityChart = () => {
                     .attr("y", (d, i) => verticalOffset + (i * 20) + 10)
                     .attr("text-anchor", "middle")
                     .attr("fill", "#ffffff")
+                    .attr("font-size", 16)
                     .style("text-shadow", "1px 1px 3px #000")
-                    .style("font-weight", "bold")
-                    .attr("font-size", "16px")
-                    .attr("pointer-events", "none");
+                    .style("font-weight", "bold");
             });
 
         svg
@@ -182,6 +188,7 @@ const TasksSolvabilityChart = () => {
             .attr("text-anchor", "middle")
             .style("font-size", "clamp(24px, 3vw, 32px)")
             .style("font-weight", "bold")
+            .style("text-shadow", "1px 1px 3px #000")
             .attr("fill", "#ffffff")
             .text("🔥 Topic Solvability Heat Map 🔥");
 
@@ -189,8 +196,8 @@ const TasksSolvabilityChart = () => {
     }, [data, dimensions]);
 
     return (
-        <div ref={containerRef} style={{ width: "100%", height: "100%", minHeight: "500px" }}>
-            <svg ref={chartRef} width={dimensions.width} height={dimensions.height} />
+        <div ref={containerRef} style={{width: "100%", height: "100%", minHeight: "500px"}}>
+            <svg ref={chartRef} width={dimensions.width} height={dimensions.height}/>
         </div>
     );
 };

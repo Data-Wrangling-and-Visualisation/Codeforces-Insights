@@ -5,7 +5,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Raleway', 'sans-serif'], // Добавляем шрифт Railway
+        // sans: ['Raleway', 'sans-serif'], // Добавляем шрифт Railway
+         sans: ['sans-serif'],
       },
       colors: {
         darkBlue: '#021521',

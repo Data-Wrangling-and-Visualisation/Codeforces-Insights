@@ -44,7 +44,7 @@ const TopicRelationshipsChart = () => {
         if (nodes.length === 0 || links.length === 0) return;
 
         const filtered = [];
-        const nodeMap = new Map(nodes.map(node => [node.id, node]));
+        // const nodeMap = new Map(nodes.map(node => [node.id, node]));
 
         nodes.forEach(node => {
             const nodeLinks = links.filter(link =>
@@ -111,14 +111,10 @@ const TopicRelationshipsChart = () => {
             .style("background", "#222")
             .style("color", "#fff")
             .style("padding", "14px 18px")
-            .style("border-radius", "12px")
+            .style("border-radius", "8px")
             .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
             .style("pointer-events", "none")
-            .style("font-family", "sans-serif")
-            .style("font-size", "16px")
-            .style("line-height", "1.6")
-            .style("transform", "scale(1)")
-            .style("transition", "transform 0.15s ease, opacity 0.15s ease");
+            .style("font-size", "16px");
 
         svg.on("mousemove", (event) => {
             const tooltipNode = tooltip.node();
@@ -185,10 +181,10 @@ const TopicRelationshipsChart = () => {
             .text(d => d.id)
             .attr("x", d => d.x)
             .attr("y", d => d.y)
-            .attr("font-size", 12)
             .attr("dx", 15)
             .attr("dy", 5)
             .attr("fill", "#ffffff")
+            .attr("font-size", 16)
             .style("text-shadow", "1px 1px 3px #000")
             .style("font-weight", "bold")
             .on("mouseover", (event, d) => {

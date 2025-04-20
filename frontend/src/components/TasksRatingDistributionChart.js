@@ -96,12 +96,13 @@ const TasksRatingDistributionChart = () => {
             .attr("class", "chart-tooltip")
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background", "rgba(0,0,0,0.8)")
-            .style("color", "white")
-            .style("padding", "8px 12px")
-            .style("border-radius", "4px")
-            .style("font-size", "14px")
-            .style("pointer-events", "none");
+            .style("background", "#222")
+            .style("color", "#fff")
+            .style("padding", "14px 18px")
+            .style("border-radius", "8px")
+            .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
+            .style("pointer-events", "none")
+            .style("font-size", "16px");
 
         const x = d3.scaleLinear()
             .domain([minRating, maxRating])
@@ -133,22 +134,22 @@ const TasksRatingDistributionChart = () => {
                     padAngle: 0.01
                 }))
                 .attr("fill", d.count > 0 ? color(d.count) : "rgba(100,100,100,0.2)")
-                .attr("opacity", 0.9)
+                .attr("opacity", 1)
                 .style("stroke", d.count > 0 ? "none" : "rgba(255,255,255,0.3)")
                 .style("stroke-width", 1)
                 .on("mouseover", function (event) {
                     d3.select(this).attr("opacity", 1);
                     tooltip.style("visibility", "visible")
                         .html(`Rating: ${d.rating}<br>Problems: ${d.count}`)
-                        .style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY - 10) + "px");
+                        .style("left", (event.pageX + 15) + "px")
+                        .style("top", (event.pageY + 15) + "px");
                 })
                 .on("mousemove", function (event) {
-                    tooltip.style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY - 10) + "px");
+                    tooltip.style("left", (event.pageX + 15) + "px")
+                        .style("top", (event.pageY + 15) + "px");
                 })
                 .on("mouseout", function () {
-                    d3.select(this).attr("opacity", 0.9);
+                    d3.select(this).attr("opacity", 1);
                     tooltip.style("visibility", "hidden");
                 });
 
@@ -236,17 +237,6 @@ const TasksRatingDistributionChart = () => {
                     }}
                 />
             </div>
-            <style jsx>{`
-                :global(.solvability-tooltip) {
-                    transform: translateZ(0);
-                    backface-visibility: hidden;
-                }
-
-                :global(.chart-tooltip) {
-                    contain: strict;
-                    will-change: transform;
-                }
-            `}</style>
         </div>
     );
 };
