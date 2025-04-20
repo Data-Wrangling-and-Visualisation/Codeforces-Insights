@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 const UserRatingChart = ({ chartType, setChartType }) => {
   const svgRef = useRef();
   const [data, setData] = useState([]);
-  // const [chartType, setChartType] = useState("experience");
+  const [chartTypeCur, setChartTypeCur] = useState("experience");
 
   const calculateBoxplotDataExperience = (data) => {
     const groupedData = d3.group(data, d => d.time_registration_years);
@@ -116,6 +116,7 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       } else if (type === "solutions_solvability") {
         setData(calculateBoxplotDataSolutionsSolvability(result));
       }
+      setChartTypeCur(type);
     } catch (error) {
       console.error("Ошибка при получении данных:", error);
     }
@@ -130,10 +131,10 @@ const UserRatingChart = ({ chartType, setChartType }) => {
     if (data.length === 0) return;
 
     function getXValue(d) {
-      if (chartType === "experience") return d.experience;
-      if (chartType === "solutions_amount") return d.solvedProblemsRange;
-      if (chartType === "solutions_rating") return d.ratingRange;
-      if (chartType === "solutions_solvability") return d.solvabilityRange;
+      if (chartTypeCur === "experience") return d.experience;
+      if (chartTypeCur === "solutions_amount") return d.solvedProblemsRange;
+      if (chartTypeCur === "solutions_rating") return d.ratingRange;
+      if (chartTypeCur === "solutions_solvability") return d.solvabilityRange;
     }
 
     function getXLabel(type) {
@@ -158,10 +159,10 @@ const UserRatingChart = ({ chartType, setChartType }) => {
 
     const x = d3.scaleBand()
       .domain(data.map((d) => {
-        if (chartType === "experience") return d.experience;
-        if (chartType === "solutions_amount") return d.solvedProblemsRange;
-        if (chartType === "solutions_rating") return d.ratingRange;
-        if (chartType === "solutions_solvability") return d.solvabilityRange;
+        if (chartTypeCur === "experience") return d.experience;
+        if (chartTypeCur === "solutions_amount") return d.solvedProblemsRange;
+        if (chartTypeCur === "solutions_rating") return d.ratingRange;
+        if (chartTypeCur === "solutions_solvability") return d.solvabilityRange;
       }))
       .range([0, width])
       .padding(0.3);
@@ -250,7 +251,7 @@ const UserRatingChart = ({ chartType, setChartType }) => {
       .attr("text-anchor", "middle")
       .attr("fill", "#F5C638")
       .style("font-size", "14px")
-      .text(getXLabel(chartType));
+      .text(getXLabel(chartTypeCur));
 
     svg.append("text")
       .attr("transform", "rotate(-90)")

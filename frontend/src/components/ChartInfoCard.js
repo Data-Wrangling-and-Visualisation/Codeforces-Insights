@@ -86,7 +86,7 @@ const ChartInfoCard = ({ chartType, setChartType }) => {
       <p className="mt-2">
         <span className="font-medium">Correlation:</span>{" "}
         {loading
-          ? "Loading..."
+          ? ""
           : typeof correlation === "number"
           ? correlation.toFixed(3)
           : "Not available"}
