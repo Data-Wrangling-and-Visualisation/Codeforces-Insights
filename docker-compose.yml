@@ -22,7 +22,7 @@ services:
     container_name: frontend
     environment:
       - NODE_ENV=development
-      - REACT_APP_API_URL=http://backend:8000
+      - REACT_APP_API_URL=${SERVER_IP}
     ports:
       - "3000:3000"  # Пробрасываем порт 3000 для фронтенда
     volumes:

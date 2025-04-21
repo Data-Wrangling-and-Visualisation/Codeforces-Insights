@@ -6,7 +6,7 @@ const TasksSolvabilityChart = () => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        fetch("${process.env.REACT_APP_API_URL}/api/topics_solvability")
+        fetch(`${process.env.REACT_APP_API_URL}/api/topics_solvability`)
             .then(res => res.json())
             .then(json => {
                 const topics = json
