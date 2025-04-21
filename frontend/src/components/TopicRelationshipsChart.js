@@ -27,7 +27,7 @@ const TopicRelationshipsChart = () => {
         .clamp(true);
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/topics_correlation')
+        fetch('${process.env.REACT_APP_API_URL}/api/topics_correlation')
             .then(response => response.json())
             .then(data => {
                 const topicWeights = {};

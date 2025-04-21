@@ -34,13 +34,13 @@ const ChartInfoCard = ({chartType, setChartType}) => {
     const [correlation, setCorrelation] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchCorrelationData = async (type) => {
-        try {
-            setLoading(true);
-            const response = await fetch(
-                `http://127.0.0.1:8000/api/users_rating_distribution_by_${type}`
-            );
-            const data = await response.json();
+  const fetchCorrelationData = async (type) => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/users_rating_distribution_by_${type}`
+      );
+      const data = await response.json();
 
             if (type === "experience") {
                 setCorrelation(data.rating_experience_correlation);

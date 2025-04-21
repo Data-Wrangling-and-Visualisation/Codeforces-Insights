@@ -103,7 +103,6 @@ CF-INSIGHTS-LAST/
 │   ├── package.json             # Frontend dependencies and scripts
 │   ├── tailwind.config.js       # Tailwind CSS configuration
 │   ├── postcss.config.js        # PostCSS configuration
-│   └── .env                     # Environment variables for frontend
 │
 ├── README.md                    # Project documentation
 └── .gitignore                   # List of files and folders ignored by Git

@@ -98,24 +98,24 @@ const UserRatingChart = ({chartType, setChartType}) => {
     };
 
 
-    const fetchData = async (type) => {
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/api/users_rating_distribution_by_${type}`);
-            const result = (await response.json()).data;
-            if (type === "experience") {
-                setData(calculateBoxplotDataExperience(result));
-            } else if (type === "solutions_amount") {
-                setData(calculateBoxplotDataSolutionsAmount(result));
-            } else if (type === "solutions_rating") {
-                setData(calculateBoxplotDataSolutionsRating(result));
-            } else if (type === "solutions_solvability") {
-                setData(calculateBoxplotDataSolutionsSolvability(result));
-            }
-            setChartTypeCur(type);
-        } catch (error) {
-            console.error("Ошибка при получении данных:", error);
-        }
-    };
+  const fetchData = async (type) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users_rating_distribution_by_${type}`);
+      const result = (await response.json()).data;
+      if (type === "experience") {
+        setData(calculateBoxplotDataExperience(result));
+      } else if (type === "solutions_amount") {
+        setData(calculateBoxplotDataSolutionsAmount(result));
+      } else if (type === "solutions_rating") {
+        setData(calculateBoxplotDataSolutionsRating(result));
+      } else if (type === "solutions_solvability") {
+        setData(calculateBoxplotDataSolutionsSolvability(result));
+      }
+      setChartTypeCur(type);
+    } catch (error) {
+      console.error("Ошибка при получении данных:", error);
+    }
+  };
 
     useEffect(() => {
         fetchData(chartType);

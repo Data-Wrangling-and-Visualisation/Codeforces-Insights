@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"  # Пробрасываем порт 8000 для API
+    environment:
+      - DB_NAME=codeforces
+      - DB_USER=student
+      - DB_PASSWORD=xa2i0YXzr9ApPjODEIMwFxEYPNy2ZL3B
+      - DB_HOST=dpg-cvjffn3ipnbc73fm95bg-a.singapore-postgres.render.com
+      - DB_PORT=5432
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: frontend
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://backend:8000
+    ports:
+      - "3000:3000"  # Пробрасываем порт 3000 для фронтенда
+    volumes:
+      - ./frontend:/app
+    # Удалили зависимость от backend:
+    # depends_on:
+    #   - backend
