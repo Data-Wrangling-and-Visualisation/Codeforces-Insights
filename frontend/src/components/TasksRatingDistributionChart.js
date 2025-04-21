@@ -95,6 +95,8 @@ const TasksRatingDistributionChart = () => {
         const tooltip = d3.select("body").append("div")
             .attr("class", "chart-tooltip")
             .style("position", "absolute")
+            .style("left", "-9999px")         // ⬅️ Добавлено
+            .style("top", "-9999px")          // ⬅️ Добавлено
             .style("visibility", "hidden")
             .style("background", "#222")
             .style("color", "#fff")

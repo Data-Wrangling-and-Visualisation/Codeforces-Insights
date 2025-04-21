@@ -17,6 +17,8 @@ const BlogsChart = () => {
         tooltipRef.current = d3.select("body").append("div")
             .attr("class", "chart-tooltip")
             .style("position", "absolute")
+            .style("left", "-9999px")         // ⬅️ Добавлено
+            .style("top", "-9999px")          // ⬅️ Добавлено
             .style("visibility", "hidden")
             .style("background", "#222")
             .style("color", "#fff")
@@ -25,6 +27,7 @@ const BlogsChart = () => {
             .style("box-shadow", "0 6px 18px rgba(0, 0, 0, 0.6)")
             .style("pointer-events", "none")
             .style("font-size", "16px");
+
 
         return () => {
             // Удаляем тултип при размонтировании компонента

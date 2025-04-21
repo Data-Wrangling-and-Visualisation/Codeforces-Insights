@@ -7,6 +7,10 @@ import TasksRatingDistributionChart from "../components/TasksRatingDistributionC
 const Tasks = () => {
   return (
     <div className="p-8 flex flex-col min-h-screen justify-between">
+      <h1 className="text-4xl font-bold text-white text-center py-24">
+        What new topics would suit your level?
+      </h1>
+
       {/* График */}
       <div>
         <TasksSolvabilityChart />

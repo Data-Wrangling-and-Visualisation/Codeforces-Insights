@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import BlogsChart from "../components/BlogsChart";
-import BlogInfoCard from "../components/BlogInfoCard";
+import InfoCard from "../components/InfoCard"; // заменили импорт
 
 const cardData = [
   {
@@ -31,15 +31,13 @@ const Blogs = () => {
 
       <BlogsChart />
 
-      
-
       {/* Блок карточек */}
       <div className="mt-20 flex flex-col lg:flex-row gap-8">
         {cardData.map((card, index) => (
-          <BlogInfoCard
+          <InfoCard
             key={index}
             title={card.title}
-            description={card.description}
+            content={card.description}
           />
         ))}
       </div>
@@ -53,7 +51,6 @@ const Blogs = () => {
         </Link>
       </div>
     </div>
-    
   );
 };
 
