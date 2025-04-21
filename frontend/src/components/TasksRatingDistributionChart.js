@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 const TasksRatingDistributionChart = () => {
@@ -8,7 +8,7 @@ const TasksRatingDistributionChart = () => {
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [topics, setTopics] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [dimensions, setDimensions] = useState({width: 1000, height: 700});
+    const [dimensions, setDimensions] = useState({ width: 1000, height: 700 });
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -66,24 +66,31 @@ const TasksRatingDistributionChart = () => {
         const maxRating = 3500;
         const ratingStep = 100;
         const allRatings = Array.from(
-            {length: (maxRating - minRating) / ratingStep + 1},
+            { length: (maxRating - minRating) / ratingStep + 1 },
             (_, i) => minRating + i * ratingStep
         );
 
+        const maxCount = d3.max(filteredData, d => d.number_of_tasks) || 1;
+
         const ratings = allRatings.map(rating => {
             const found = filteredData.find(d => d.rating === rating);
+            const count = found ? found.number_of_tasks : 0;
+            const percentage = maxCount > 0 ? (count / maxCount) : 0;
             return {
                 rating,
-                count: found ? found.number_of_tasks : 0
+                count,
+                percentage
             };
         });
 
-        const {width, height} = dimensions;
-        const margin = {top: 80, right: 40, bottom: 40, left: 40};
-        const radius = Math.min(width - margin.left - margin.right, (height - margin.top - margin.bottom));
-        const innerRadius = radius * 0.3;
+        const { width: originalWidth, height: originalHeight } = dimensions;
+        const width = originalWidth * 4;
+        const height = originalHeight * 4;
+
+        const margin = { top: 100, right: 200, bottom: 50, left: 200 };
         const centerX = width / 2;
-        const centerY = height - margin.bottom - 10;
+        const centerY = height - margin.bottom;
+        const baseRadius = Math.min(width, height) * 0.6;
 
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
@@ -106,85 +113,113 @@ const TasksRatingDistributionChart = () => {
             .style("pointer-events", "none")
             .style("font-size", "16px");
 
-        const x = d3.scaleLinear()
+        const angleScale = d3.scaleLinear()
             .domain([minRating, maxRating])
             .range([-Math.PI / 2, Math.PI / 2]);
 
-        const y = d3.scaleRadial()
-            .domain([0, d3.max(ratings, d => d.count) || 1])
-            .range([innerRadius, radius]);
-
         const color = d3.scaleSequential()
-            .domain([0, d3.max(ratings, d => d.count) || 1])
-            .interpolator(d3.interpolateHcl("#FFF5D9", "#F5C638"));
+            .domain([0, 1])
+            .interpolator(d3.interpolateHcl("#6A4E17", "#F5C638"));
 
         const g = svg.append("g")
             .attr("transform", `translate(${centerX},${centerY})`);
 
-        const barWidth = 0.1;
+        const tileThickness = 72;
+        const tileLength = (Math.PI) / (maxRating - minRating) * ratingStep;
+        const tileInnerRadius = baseRadius * 0.7;
+        const tileOuterRadius = tileInnerRadius + tileThickness;
+
+        const generateCurves = (d, numCurves) => {
+            const baseAngle = angleScale(d.rating);
+            const startAngle = baseAngle - tileLength / 2;
+            const endAngle = baseAngle + tileLength / 2;
+
+            return Array.from({ length: numCurves }).map((_, i) => {
+                const t = i / (numCurves - 1);
+                const angle = startAngle + t * tileLength;
+                const targetRadius = tileInnerRadius + (tileThickness * 0.8);
+
+                return d3.line()
+                    .curve(d3.curveBasis)([
+                        [0, 0],
+                        [
+                            Math.sin(angle) * baseRadius * 0.3,
+                            -Math.cos(angle) * baseRadius * 0.3 - 100
+                        ],
+                        [
+                            Math.sin(angle) * baseRadius * 0.7,
+                            -Math.cos(angle) * baseRadius * 0.7 - 50
+                        ],
+                        [
+                            Math.sin(angle) * targetRadius,
+                            -Math.cos(angle) * targetRadius
+                        ]
+                    ]);
+            });
+        };
 
         ratings.forEach(d => {
-            const angle = x(d.rating);
-            const outerRadius = y(d.count);
+            const numCurves = Math.floor(d.percentage * 10);
+            if (numCurves <= 0) return;
+
+            generateCurves(d, numCurves).forEach(curve => {
+                g.append("path")
+                    .attr("d", curve)
+                    .attr("fill", "none")
+                    .attr("stroke", "#F5C638")
+                    .attr("stroke-width", 4)
+                    .attr("stroke-linecap", "round")
+                    .attr("opacity", 0.9);
+            });
+        });
+
+        ratings.forEach(d => {
+            const angle = angleScale(d.rating);
+            const startAngle = angle - tileLength / 2;
+            const endAngle = angle + tileLength / 2;
+
+            const tile = d3.arc()
+                .innerRadius(tileInnerRadius)
+                .outerRadius(tileOuterRadius)
+                .startAngle(startAngle)
+                .endAngle(endAngle)
+                .cornerRadius(8);
 
             g.append("path")
-                .attr("d", d3.arc()({
-                    innerRadius: y(0),
-                    outerRadius: outerRadius,
-                    startAngle: angle - barWidth / 2,
-                    endAngle: angle + barWidth / 2,
-                    padAngle: 0.01
-                }))
-                .attr("fill", d.count > 0 ? color(d.count) : "rgba(100,100,100,0.2)")
-                .attr("opacity", 1)
-                .style("stroke", d.count > 0 ? "none" : "rgba(255,255,255,0.3)")
-                .style("stroke-width", 1)
+                .attr("d", tile)
+                .attr("fill", d.count > 0 ? color(d.percentage) : "rgba(100,100,100,0.1)")
+                .attr("stroke", "#333")
+                .attr("stroke-width", 2)
                 .on("mouseover", function (event) {
-                    d3.select(this).attr("opacity", 1);
+                    d3.select(this)
+                        .attr("opacity", 1)
+                        .attr("stroke", "#FFF");
                     tooltip.style("visibility", "visible")
-                        .html(`Rating: ${d.rating}<br>Problems: ${d.count}`)
-                        .style("left", (event.pageX + 15) + "px")
-                        .style("top", (event.pageY + 15) + "px");
-                })
-                .on("mousemove", function (event) {
-                    tooltip.style("left", (event.pageX + 15) + "px")
-                        .style("top", (event.pageY + 15) + "px");
+                        .html(`Rating: ${d.rating}<br>Problems: ${d.count}<br>(${(d.percentage * 100).toFixed(0)}% of max)`)
+                        .style("left", `${event.pageX + 15}px`)
+                        .style("top", `${event.pageY + 15}px`);
                 })
                 .on("mouseout", function () {
-                    d3.select(this).attr("opacity", 1);
+                    d3.select(this)
+                        .attr("opacity", 1)
+                        .attr("stroke", "#333");
                     tooltip.style("visibility", "hidden");
                 });
-
-            if (d.rating % 500 === 0) {
-                const labelRadius = y(0) - 25;
-                const labelX = Math.sin(angle) * labelRadius;
-                const labelY = -Math.cos(angle) * labelRadius;
-
-                g.append("text")
-                    .attr("x", labelX)
-                    .attr("y", labelY)
-                    .attr("text-anchor", "middle")
-                    .text(d.rating)
-                    .style("font-size", "14px")
-                    .style("fill", "#fff")
-                    .style("font-weight", "bold");
-            }
         });
 
         svg.append("text")
             .attr("x", width / 2)
-            .attr("y", 50)
-            .text(`Distribution of topic rating: ${selectedTopic}`)
+            .attr("y", 150)
+            .text(`Distribution for: ${selectedTopic}`)
             .style("text-anchor", "middle")
-            .style("font-size", "22px")
-            .style("fill", "#fff");
+            .style("font-size", "48px")
+            .style("fill", "#FFD700")
+            .style("text-shadow", "0 2px 4px rgba(255,215,0,0.5)");
 
-        return () => {
-            tooltip.remove();
-        };
+        return () => tooltip.remove();
     }, [data, loading, selectedTopic, dimensions]);
 
-    if (loading) return <div style={{color: '#fff', textAlign: 'center'}}>Loading...</div>;
+    if (loading) return <div style={{ color: '#fff', textAlign: 'center' }}>Loading...</div>;
 
     return (
         <div ref={containerRef} style={{
@@ -205,17 +240,18 @@ const TasksRatingDistributionChart = () => {
                     value={selectedTopic}
                     onChange={e => setSelectedTopic(e.target.value)}
                     style={{
-                        padding: '10px',
-                        fontSize: '16px',
+                        padding: '12px 18px',
+                        fontSize: '18px',
                         backgroundColor: '#333',
                         color: '#fff',
                         border: '1px solid #555',
-                        borderRadius: '4px',
-                        outline: 'none'
+                        borderRadius: '6px',
+                        outline: 'none',
+                        cursor: 'pointer'
                     }}
                 >
                     {topics.map(topic => (
-                        <option key={topic} value={topic} style={{backgroundColor: '#333', color: '#fff'}}>
+                        <option key={topic} value={topic} style={{ backgroundColor: '#333', color: '#fff' }}>
                             {topic}
                         </option>
                     ))}
@@ -224,7 +260,7 @@ const TasksRatingDistributionChart = () => {
             <div style={{
                 position: 'relative',
                 width: '100%',
-                paddingBottom: `${(dimensions.height / dimensions.width) * 100}%`,
+                paddingBottom: `70%`, // фиксированный отступ
                 overflow: 'hidden'
             }}>
                 <svg
