@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
 
 const TasksRatingDistributionChart = () => {
@@ -8,7 +8,7 @@ const TasksRatingDistributionChart = () => {
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [topics, setTopics] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [dimensions, setDimensions] = useState({ width: 1000, height: 700 });
+    const [dimensions, setDimensions] = useState({width: 1000, height: 700});
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -66,7 +66,7 @@ const TasksRatingDistributionChart = () => {
         const maxRating = 3500;
         const ratingStep = 100;
         const allRatings = Array.from(
-            { length: (maxRating - minRating) / ratingStep + 1 },
+            {length: (maxRating - minRating) / ratingStep + 1},
             (_, i) => minRating + i * ratingStep
         );
 
@@ -83,13 +83,13 @@ const TasksRatingDistributionChart = () => {
             };
         });
 
-        const { width: originalWidth, height: originalHeight } = dimensions;
+        const {width: originalWidth, height: originalHeight} = dimensions;
         const width = originalWidth * 4;
         const height = originalHeight * 4;
 
-        const margin = { top: 100, right: 200, bottom: 50, left: 200 };
+        const margin = {top: 100, right: 200, bottom: 50, left: 200};
         const centerX = width / 2;
-        const centerY = height - margin.bottom;
+        const centerY = height / 2 - margin.bottom;
         const baseRadius = Math.min(width, height) * 0.6;
 
         const svg = d3.select(svgRef.current);
@@ -134,7 +134,7 @@ const TasksRatingDistributionChart = () => {
             const startAngle = baseAngle - tileLength / 2;
             const endAngle = baseAngle + tileLength / 2;
 
-            return Array.from({ length: numCurves }).map((_, i) => {
+            return Array.from({length: numCurves}).map((_, i) => {
                 const t = i / (numCurves - 1);
                 const angle = startAngle + t * tileLength;
                 const targetRadius = tileInnerRadius + (tileThickness * 0.8);
@@ -194,8 +194,12 @@ const TasksRatingDistributionChart = () => {
                     d3.select(this)
                         .attr("opacity", 1)
                         .attr("stroke", "#FFF");
+
                     tooltip.style("visibility", "visible")
-                        .html(`Rating: ${d.rating}<br>Problems: ${d.count}<br>(${(d.percentage * 100).toFixed(0)}% of max)`)
+                        .html(`Rating: ${d.rating}<br>Problems: ${d.count}`);
+                })
+                .on("mousemove", function (event) {
+                    tooltip
                         .style("left", `${event.pageX + 15}px`)
                         .style("top", `${event.pageY + 15}px`);
                 })
@@ -207,19 +211,19 @@ const TasksRatingDistributionChart = () => {
                 });
         });
 
-        svg.append("text")
-            .attr("x", width / 2)
-            .attr("y", 150)
-            .text(`Distribution for: ${selectedTopic}`)
-            .style("text-anchor", "middle")
-            .style("font-size", "48px")
-            .style("fill", "#FFD700")
-            .style("text-shadow", "0 2px 4px rgba(255,215,0,0.5)");
+        // svg.append("text")
+        //     .attr("x", width / 2)
+        //     .attr("y", 150)
+        //     .text(`Distribution for: ${selectedTopic}`)
+        //     .style("text-anchor", "middle")
+        //     .style("font-size", "48px")
+        //     .style("fill", "#FFD700")
+        //     .style("text-shadow", "0 2px 4px rgba(255,215,0,0.5)");
 
         return () => tooltip.remove();
     }, [data, loading, selectedTopic, dimensions]);
 
-    if (loading) return <div style={{ color: '#fff', textAlign: 'center' }}>Loading...</div>;
+    if (loading) return <div style={{color: '#fff', textAlign: 'center'}}>Loading...</div>;
 
     return (
         <div ref={containerRef} style={{
@@ -251,7 +255,7 @@ const TasksRatingDistributionChart = () => {
                     }}
                 >
                     {topics.map(topic => (
-                        <option key={topic} value={topic} style={{ backgroundColor: '#333', color: '#fff' }}>
+                        <option key={topic} value={topic} style={{backgroundColor: '#333', color: '#fff'}}>
                             {topic}
                         </option>
                     ))}
@@ -260,7 +264,7 @@ const TasksRatingDistributionChart = () => {
             <div style={{
                 position: 'relative',
                 width: '100%',
-                paddingBottom: `70%`, // фиксированный отступ
+                paddingBottom: `50%`, // фиксированный отступ
                 overflow: 'hidden'
             }}>
                 <svg
@@ -270,7 +274,7 @@ const TasksRatingDistributionChart = () => {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: '100%',
+                        height: '150%',
                         background: 'transparent'
                     }}
                 />
